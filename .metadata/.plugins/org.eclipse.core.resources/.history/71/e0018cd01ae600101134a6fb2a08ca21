@@ -1,0 +1,82 @@
+package service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.MemberDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class MemberServiceTest {
+
+	@Autowired
+	private MemberService memberService;
+	
+	@Test
+	void testSelectAll() {
+		//given
+		
+		//when 
+		List<MemberDTO> selectAll = memberService.selectAll();
+		
+		//then
+		assertNotNull(selectAll);
+		selectAll.forEach(m -> log.info(m));
+	}
+
+	@Test
+	void testSelectById() {
+		//given
+		String id = "test";
+		
+		//when
+		MemberDTO dto = memberService.selectById(id);
+		
+		//then
+		log.info(dto);
+	}
+
+	@Test
+	void testInsert() {
+		//given
+		MemberDTO dto = MemberDTO.builder()
+				.id("test2")
+				.name("test2")
+				.password("1234")
+				.email("test2@test.com")
+				.phone("010-1111-1111")
+				.role("admin")
+				.build();
+		
+		//when
+		memberService.insert(dto);
+		
+		//then
+		memberService.selectAll();
+	}
+
+	@Test
+	void testUpdate() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	void testDelete() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	void testMemberServiceImpl() {
+		fail("Not yet implemented");
+	}
+
+}

@@ -1,0 +1,23 @@
+package service;
+
+import java.util.List;
+
+import dto.MemberDTO;
+
+public interface MemberService {
+	
+	List<MemberDTO> selectAll();	// 전체 조회
+	
+	
+	MemberDTO selectById(String id);		// 1개만 조회
+	
+	
+	void insert(MemberDTO dto);		// insert 추가
+	
+	
+	void delete(String id); 		// delete 삭제
+	
+	
+	void update(MemberDTO dto);		// update 수정
+	
+}

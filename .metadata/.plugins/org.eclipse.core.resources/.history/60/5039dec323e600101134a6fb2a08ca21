@@ -1,0 +1,58 @@
+package controller;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import dto.MemberDTO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.MemberService;
+
+@Controller
+@Log4j2
+@RequestMapping("/member")
+@RequiredArgsConstructor
+public class MemberController {
+	
+	private final MemberService memberService;
+
+	
+	@GetMapping("/list")
+	public String list(Model model) {
+		
+		List<MemberDTO> dto = memberService.selectAll();
+		model.addAttribute("members", dto);
+		
+		return "/list";
+	}
+	
+	
+	
+	
+	//index.jsp에서 회원가입을 누르면
+	@GetMapping("/join")
+	public String goJoinPage() {
+		return "member/join";
+	}
+	
+	//join.jsp에서 가입하기를 누르면
+	@PostMapping("/join")
+	public String list(MemberDTO dto, @Param("adminCode") String adminCode) {
+		
+		
+		
+	}
+}
+
+
+
+
+
+
+

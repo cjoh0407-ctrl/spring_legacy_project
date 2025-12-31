@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+org.eclipse.jdt.core.classpathVariable.ECLIPSE_HOME=D\:/ChangJun/Dev/eclipse/
+org.eclipse.jdt.core.classpathVariable.JRE_LIB=D\:/ChangJun/Dev/zulu21.44.17/lib/jrt-fs.jar
+org.eclipse.jdt.core.classpathVariable.JRE_SRC=D\:/ChangJun/Dev/zulu21.44.17/lib/src.zip
+org.eclipse.jdt.core.classpathVariable.JRE_SRCROOT=
+org.eclipse.jdt.core.classpathVariable.JUNIT_HOME=D\:/ChangJun/Dev/eclipse/plugins/org.junit_4.13.2.v20240929-1000.jar
+org.eclipse.jdt.core.classpathVariable.M2_REPO=C\:/Users/M/.m2/repository
+org.eclipse.jdt.core.codeComplete.visibilityCheck=enabled

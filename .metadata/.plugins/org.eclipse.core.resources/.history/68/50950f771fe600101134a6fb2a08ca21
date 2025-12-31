@@ -1,0 +1,92 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Legacy Home</title>
+    <style>
+        /* 기본 스타일 초기화 */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* 중앙 카드 박스 */
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* 버튼 스타일 */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            display: block;
+            padding: 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4e73df;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2e59d9;
+        }
+
+        .btn-outline {
+            border: 2px solid #4e73df;
+            color: #4e73df;
+        }
+
+        .btn-outline:hover {
+            background-color: #f8f9fc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>안녕하세요!</h1>
+        <p>회원 관리 시스템에 오신 것을 환영합니다.</p>
+        
+        <div class="btn-group">
+            <a href="${pageContext.request.contextPath}/member/list" class="btn btn-primary">
+                회원 목록 조회
+            </a>
+            
+            <a href="${pageContext.request.contextPath}/member/register" class="btn btn-outline">
+                신규 회원 가입
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
