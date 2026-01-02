@@ -1,0 +1,29 @@
+package mapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
+class BoardMapperTest {
+
+	@Test
+	void testSelectAll() {
+	}
+
+	@Test
+	void testModify() {
+	}
+
+	@Test
+	void testInsert() {
+	}
+
+	@Test
+	void testDelete() {
+	}
+
+	@Test
+	void testUpdate() {
+	}
+
+}

@@ -28,10 +28,16 @@
   	<!-- update 수정하기 -->
   <update id="update" parameterType="dto.MemberDTO"
   	useGeneratedKeys="true" keyProperty="id">
-    update members set
-    name = #{name}, password = #{password}, 
-    email = #{email}, phone = #{phone}
-    where id = #{id}
+	UPDATE members
+    	<set>
+        name = #{name},
+        <if test="password != null and password != ''">
+            password = #{password},
+        </if>
+            email = #{email},
+            phone = #{phone}
+    </set>
+    WHERE id = #{id}
   </update>  
   
   	<!-- delete 삭제하기 -->
@@ -39,7 +45,5 @@
     delete from members
     where id = #{id}
   </delete>  
-  
-  
   
 </mapper>

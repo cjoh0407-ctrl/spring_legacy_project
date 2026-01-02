@@ -1,5 +1,47 @@
 package service;
 
-public class BoardServiceImpl {
+import java.util.List;
 
+import org.springframework.stereotype.Service;
+
+import dto.BoardDTO;
+import lombok.RequiredArgsConstructor;
+import mapper.BoardMapper;
+
+@Service
+@RequiredArgsConstructor
+public class BoardServiceImpl implements BoardService{
+
+	private final BoardMapper boardMapper;
+
+	@Override
+	public List<BoardDTO> selectAll() {
+		return boardMapper.selectAll();
+	}
+
+	@Override
+	public BoardDTO detailByOne(int seq) {
+		return boardMapper.detailByOne(seq);
+	}
+
+	@Override
+	public void insert(BoardDTO dto) {
+		boardMapper.insert(dto);
+	}
+
+	@Override
+	public void delete(int seq) {
+		boardMapper.delete(seq);
+	}
+
+	@Override
+	public void update(BoardDTO dto) {
+		boardMapper.update(dto);
+	}
+	
+	@Override
+	public void plusHit(int seq) {
+		boardMapper.plusHit(seq);
+	}
+	
 }

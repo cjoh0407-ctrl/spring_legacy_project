@@ -1,0 +1,76 @@
+package service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.BoardDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class BoardServiceImplTest {
+
+	@Autowired
+	private BoardService boardService;
+	
+	@Test
+	void testSelectAll() {
+		//given
+		
+		//when
+		List<BoardDTO> list = boardService.selectAll();	
+		
+		//then
+		assertNotNull(list);
+		list.forEach(m -> log.info(m));
+	}
+
+	@Test
+	void testModify() {
+		//given
+		int seq = 2;
+				
+		//when
+		BoardDTO modify = boardService.modify(seq);
+		
+		//then
+		assertNotNull(modify);
+		log.info(modify);
+	}
+
+	@Test
+	void testInsert() {
+		//given
+		
+		//when
+		
+		//then
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		
+		//when
+		
+		//then
+	}
+
+	@Test
+	void testUpdate() {
+		//given
+		
+		//when
+		
+		//then
+	}
+
+}

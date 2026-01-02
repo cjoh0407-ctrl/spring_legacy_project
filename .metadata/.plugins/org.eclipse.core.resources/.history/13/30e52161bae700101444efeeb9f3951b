@@ -1,0 +1,68 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>새 글 작성</title>
+<style>
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f7f6; padding: 20px; }
+    .container { width: 700px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    h2 { text-align: center; color: #333; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+    
+    /* 입력창 스타일 */
+    .form-control { 
+        width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; 
+        box-sizing: border-box; font-size: 14px; 
+    }
+    .form-control:focus { border-color: #333; outline: none; }
+    
+    /* 작성자 칸(readonly) 스타일 */
+    .form-control[readonly] { background-color: #eee; cursor: not-allowed; color: #777; }
+    
+    textarea.form-control { height: 300px; resize: none; }
+
+    /* 버튼 스타일 */
+    .btn-area { text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 10px; }
+    .btn { padding: 12px 30px; text-decoration: none; border-radius: 5px; font-size: 15px; cursor: pointer; border: none; transition: 0.3s; }
+    .btn-submit { background-color: #333; color: white; }
+    .btn-submit:hover { background-color: #555; }
+    .btn-cancel { background-color: #e9ecef; color: #333; }
+    .btn-cancel:hover { background-color: #ddd; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>새 글 작성</h2>
+    
+    <form action="/board/register" method="post">
+        <div class="form-group">
+            <label>작성자</label>
+            <input type="text" name="writer" class="form-control" 
+                   value="${sessionScope.member.id}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>제목</label>
+            <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요" required>
+        </div>
+
+        <div class="form-group">
+            <label>내용</label>
+            <textarea name="content" class="form-control" placeholder="내용을 입력하세요" required></textarea>
+        </div>
+
+        <div class="btn-area">
+            <button type="submit" class="btn btn-submit">등록하기</button>
+            <a href="/board/list" class="btn btn-cancel">취소</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

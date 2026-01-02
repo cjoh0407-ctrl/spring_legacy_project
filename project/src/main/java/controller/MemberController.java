@@ -97,6 +97,45 @@ public class MemberController {
 	        return "redirect:/"; // 다시 로그인 페이지(메인)로
 	    }
 	}
+	
+	
+	// 회원 정보 수정 페이지
+	@GetMapping("/update")
+	public String updateForm(HttpSession session) {
+		
+		String id = session.getId();
+		memberService.selectById(id);
+		
+		return "member/update";
+	}
+	
+	//회원 정보 수정 업데이트 이후 게시판으로 리다이렉트
+	@PostMapping("/update")
+	public String update(MemberDTO dto) {
+		memberService.update(dto);
+		return "redirect:/board/list";
+	}
+	
+	//회원탈퇴
+	@GetMapping("/delete")
+	public String delete(HttpSession session) {
+		MemberDTO dto = (MemberDTO) session.getAttribute("member");
+		memberService.delete(dto.getId());
+		session.invalidate();
+		
+		return "redirect:/";
+	}
+	
+	//로그아웃
+	@GetMapping("/logout")
+	public String logout(HttpSession session) {
+		session.invalidate();
+				
+		return "redirect:/";
+	}
+	
+	
+	
 }
 
 

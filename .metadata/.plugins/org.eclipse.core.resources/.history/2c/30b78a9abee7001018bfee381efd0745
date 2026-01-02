@@ -1,0 +1,112 @@
+package controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.mysql.cj.Session;
+
+import dto.BoardDTO;
+import dto.MemberDTO;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.server.PathParam;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.BoardService;
+
+@Controller
+@Log4j2
+@RequestMapping("/board")
+@RequiredArgsConstructor
+public class BoardController {
+
+	private final BoardService boardService;
+	
+	// 게시판 목록으로
+	@GetMapping("/list")
+	public String goList(Model model) {
+		
+		List<BoardDTO> getList = boardService.selectAll();
+		model.addAttribute("boardList", getList);
+		
+		return "board/list";
+	}
+	
+	
+	// 새 글 작성 페이지로
+	@GetMapping("/register")
+	public String register() {
+		return "board/register";
+	}
+	
+	// 새 글 등록하고 list로 리턴.
+	@PostMapping("/register")
+	public String register(BoardDTO dto) {
+			
+			/*
+							@RequestParam("writer") String writer,
+							@RequestParam("title") String title,
+							@RequestParam("content") String content) {
+		
+		BoardDTO dto = BoardDTO.builder()
+							.writer(writer)
+							.title(title)
+							.content(content)
+							.build();
+		*/
+			
+		boardService.insert(dto);
+		
+		return "redirect:/board/list";
+	}
+	
+	//게시물 상세보기 페이지
+	
+	@GetMapping("/detail")
+	public String detail(@RequestParam("seq") int seq, HttpSession session, Model model) {
+	    
+	    // 1. 세션에서 "이미 읽은 글 번호 리스트"를 꺼냅니다.
+		@SuppressWarnings("unchecked")
+	    List<Integer> visitedList = (List<Integer>) session.getAttribute("visitedList");
+
+	    // 2. 만약 리스트가 없다면(처음 글을 읽는 경우) 리스트를 새로 만듭니다.
+	    if (visitedList == null) {
+	        visitedList = new ArrayList<>();
+	    }
+
+	    // 3. 현재 글 번호(seq)가 리스트에 있는지 확인합니다.
+	    if (!visitedList.contains(seq)) {
+	        // 리스트에 번호가 없다면? -> 처음 읽는 글이므로 조회수 증가!
+	        boardService.plusHit(seq);
+	        
+	        // 그리고 리스트에 이 번호를 추가합니다.
+	        visitedList.add(seq);
+	        
+	        // 갱신된 리스트를 다시 세션에 담습니다.
+	        session.setAttribute("visitedList", visitedList);
+	    }
+
+	    // 4. 게시글 상세 정보 가져오기
+	    BoardDTO dto = boardService.detailByOne(seq);
+	    model.addAttribute("board", dto);
+	    
+	    return "board/detail";
+	}
+
+
+	
+	
+	
+}
+
+
+
+
+
+

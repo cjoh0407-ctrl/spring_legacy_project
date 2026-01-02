@@ -1,0 +1,56 @@
+package controller;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.mysql.cj.Session;
+
+import dto.BoardDTO;
+import dto.MemberDTO;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.BoardService;
+
+@Controller
+@Log4j2
+@RequestMapping("/board")
+@RequiredArgsConstructor
+public class BoardController {
+
+	private final BoardService boardService;
+	
+	// 게시판 목록으로
+	@GetMapping("/list")
+	public String goList(Model model) {
+		
+		List<BoardDTO> getList = boardService.selectAll();
+		model.addAttribute("boardList", getList);
+		
+		return "board/list";
+	}
+	
+	
+	// 새 글 작성 페이지로
+	@GetMapping("/register")
+	public String register(BoardDTO dto, HttpSession session) {
+
+		MemberDTO member = (MemberDTO) session.getAttribute("member");
+		
+		return "board/register";
+	}
+	
+	
+	
+	
+}
+
+
+
+
+
+

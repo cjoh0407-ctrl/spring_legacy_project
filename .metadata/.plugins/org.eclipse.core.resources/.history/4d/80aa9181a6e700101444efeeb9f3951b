@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.BoardMapper">
+
+<select id="selectAll" resultType="dto.BoardDTO">
+select seq, writer, title, content, hit, regdate, updatedate
+from board
+order by seq desc;
+</select>
+
+<select id="modify" resultType="dto.BoardDTO">
+select seq, writer, title, content, hit, regdate
+from board
+where seq = #{seq};
+</select>
+
+<insert id="insert" parameterType="dto.BoardDTO">
+insert into board (writer, title, content) 
+values (#{writer} ,#{title}, #{content})
+</insert>
+
+<update id="update" parameterType="dto.BoardDTO">
+update board 
+set title=#{title}, content=#{content}
+where seq=#{seq}
+</update>
+
+<update id="delete" parameterType="int">
+update board set delflag=ture
+where seq=#{seq}
+</update>
+</mapper>

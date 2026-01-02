@@ -1,0 +1,88 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<style>
+    /* 헤더 전체 컨테이너 */
+    .top-navbar {
+        background-color: #fff;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0 40px;
+        height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin-bottom: 30px; /* 본문과의 간격 */
+    }
+
+    /* 로고 부분 */
+    .nav-logo a {
+        font-size: 20px;
+        font-weight: 800;
+        color: #333;
+        text-decoration: none;
+        letter-spacing: -1px;
+    }
+
+    /* 사용자 메뉴 영역 */
+    .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        font-size: 14px;
+    }
+
+    .user-name {
+        color: #666;
+        font-weight: bold;
+    }
+
+    .user-name span {
+        color: #007bff; /* 이름 부분에 포인트 컬러 */
+    }
+
+    /* 링크 버튼 스타일 */
+    .nav-link {
+        color: #555;
+        text-decoration: none;
+        transition: 0.2s;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .nav-link:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+
+    .btn-logout {
+        color: #dc3545; /* 로그아웃은 약간 붉은 톤 */
+        font-weight: 600;
+    }
+
+    .btn-logout:hover {
+        background-color: #fff5f5;
+    }
+</style>
+
+<div class="top-navbar">
+    <div class="nav-logo">
+        <a href="/board/list">MY BOARD</a>
+    </div>
+
+    <div class="nav-menu">
+        <c:choose>
+            <c:when test="${empty sessionScope.member}">
+                <a href="/" class="nav-link">로그인</a>
+                <a href="/member/join" class="nav-link">회원가입</a>
+            </c:when>
+            <c:otherwise>
+                <div class="user-name">
+                    <span>${sessionScope.member.name}</span>님 접속 중
+                </div>
+                <a href="/member/update" class="nav-link">내 정보 수정</a>
+                <a href="/member/logout" class="nav-link btn-logout">로그아웃</a>
+            </c:otherwise>
+        </c:choose>
+    </div>
+</div>
