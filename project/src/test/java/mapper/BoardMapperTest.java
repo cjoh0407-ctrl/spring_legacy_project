@@ -34,7 +34,30 @@ class BoardMapperTest {
 		list.forEach(m -> log.info(m));
 		
 	}
+	
+	@Test	// 페이징 처리
+	void testGetListPaging() {
+		//given
+		int page = 1;
+		int size = 10;
+		int skip = (page - 1) * size;
+		
+		//when
+		List<BoardDTO> list = boardMapper.getListPaging(skip, size);
+		
+		//then
+		list.forEach(m -> log.info("게시글 : " + m));
+		
+	}
 
+	@Test
+	void testGetCount() {
+		int total = boardMapper.getPagingCount();
+		
+		log.info("전체 게시글 개수 : " + total);
+	}
+	
+	
 	@Test
 	void testModify() {
 		//given
@@ -75,8 +98,16 @@ class BoardMapperTest {
 		boardMapper.delete(seq);
 		
 		//then
+	}
+	
+	@Test
+	void testRestore() {
+		//given
+		int seq = 402;
+		//when
+		boardMapper.restore(seq);
 		
-		
+		//then
 	}
 
 	@Test
@@ -111,4 +142,63 @@ class BoardMapperTest {
 		//then
 	}
 
+	@Test
+	void testGetTotalCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardMapper.getTotalCount();
+		
+		//then
+		log.info("총 게시물 수 : " + totalCount);
+		
+	}
+	
+	@Test
+	void testGetTodayCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardMapper.getTodayCount();
+				
+		//then
+		log.info("오늘 게시물 수 : " + totalCount);		
+	}
+	
+	@Test
+    public void testListSearch() {
+		//given
+        String types = "w";
+        String keyword = "user01"; 
+        String role = "USER";
+
+        //when
+        List<BoardDTO> list = boardMapper.listSearch(0, 10, types, keyword, role);
+        
+        //then
+        log.info("검색 결과 개수: " + list.size());
+        list.forEach(board -> log.info(board));
+    }
+	
+	@Test
+	public void testListCountSearch() {
+	    // 1. 테스트 조건 설정 (위의 테스트와 동일하게 설정)
+	    String types = "w";
+	    String keyword = "user01";
+	    String role = "USER";
+
+	    // 2. 매퍼 호출
+	    int totalCount = boardMapper.listCountSearch(types, keyword, role);
+	    
+	    // 3. 결과 확인
+	    log.info("검색된 총 게시글 수: " + totalCount);
+	    
+	    // 검증: 개수가 0보다 크거나 같은지 확인
+	    if(totalCount >= 0) {
+	        log.info("카운트 쿼리 정상 작동 중");
+	    }
+	}
+	
 }

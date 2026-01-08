@@ -1,0 +1,72 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>게시글 상세보기</title>
+<style>
+    body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f7f6; margin: 0; }
+    .container { width: 850px; margin: 40px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    
+    .detail-header { border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+    .detail-title { font-size: 28px; font-weight: bold; color: #222; margin-bottom: 15px; }
+    
+    .info-bar { display: flex; color: #888; font-size: 14px; gap: 20px; background: #f9f9f9; padding: 10px 15px; border-radius: 6px; }
+    .info-bar b { color: #333; }
+
+    /* 내용 영역: 수정 불가능한 텍스트 상태 */
+    .content-area { 
+        margin-top: 30px; 
+        min-height: 400px; 
+        line-height: 1.8; 
+        font-size: 16px; 
+        color: #444; 
+        white-space: pre-wrap; /* 줄바꿈과 공백을 유지함 */
+        border-bottom: 1px solid #eee;
+        padding-bottom: 30px;
+    }
+
+    .btn-area { display: flex; justify-content: space-between; margin-top: 30px; }
+    .btn { padding: 10px 25px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; text-decoration: none; border: none; transition: 0.2s; }
+    
+    .btn-list { background-color: #6c757d; color: white; }
+    .btn-modify { background-color: #007bff; color: white; }
+    .btn-delete { background-color: #dc3545; color: white; }
+    .btn:hover { opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<%@ include file="../common/header.jsp" %>
+
+<div class="container">
+    <div class="detail-header">
+        <div class="detail-title">${board.title}</div>
+        
+        <div class="info-bar">
+            <span>번호: <b>${board.seq}</b></span>
+            <span>작성자: <b>${board.writer}</b></span>
+            <span>작성일: <b>${board.regdateShort}</b></span>
+            <span>조회수: <b>${board.hit}</b></span>
+        </div>
+    </div>
+
+    <div class="content-area">${board.content}</div>
+
+    <div class="btn-area">
+        <a href="/board/list" class="btn btn-list">목록으로</a>
+        
+        <div class="btn-group">
+            <%-- 작성자 본인일 때만 수정/삭제 버튼이 보이게 설정 --%>
+            <c:if test="${sessionScope.member.id == board.writer}">
+                <a href="/board/modify?seq=${board.seq}" class="btn btn-modify">수정하기</a>
+                <a href="/board/delete?seq=${board.seq}" class="btn btn-delete" 
+                   onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+            </c:if>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

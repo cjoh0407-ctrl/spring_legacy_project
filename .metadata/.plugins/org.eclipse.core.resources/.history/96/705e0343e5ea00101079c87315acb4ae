@@ -1,0 +1,52 @@
+package service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import dto.ReplyDTO;
+import dto.ReplyListPaginDTO;
+import lombok.RequiredArgsConstructor;
+import mapper.ReplyMapper;
+
+@Service
+@RequiredArgsConstructor
+public class ReplyServiceImpl implements ReplyService{
+
+	private final ReplyMapper replyMapper;
+	
+	@Override
+	public int insert(ReplyDTO replyDTO) {
+		return replyMapper.insert(replyDTO);
+	}
+
+	@Override
+	public ReplyDTO read(int rno) {
+		return replyMapper.read(rno);
+	}
+
+	@Override
+	public int delete(int rno) {
+		return replyMapper.delete(rno);
+	}
+
+	@Override
+	public int update(ReplyDTO replyDTO) {
+		return replyMapper.update(replyDTO);
+	}
+
+	@Override
+	public ReplyListPaginDTO listOfBoard(int bno, int skip, int limit) {
+		
+		replyMapper.listOfBoard(bno, skip, limit);
+		
+		return null;// 페이징 처리 하기
+		
+	}
+
+	@Override
+	public int countOfBoard(int bno) {
+		return replyMapper.countOfBoard(bno);
+	}
+
+}

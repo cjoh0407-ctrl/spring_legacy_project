@@ -1,0 +1,90 @@
+package controller;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import dto.BoardDTO;
+import dto.MemberDTO;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.BoardService;
+import service.MemberService;
+
+@Controller
+@Log4j2
+@RequestMapping("/admin")
+@RequiredArgsConstructor
+public class AdminController {
+
+	private final BoardService boardService;
+	private final MemberService memberService;
+	
+	
+	// 관리자 페이지
+	@GetMapping("/main")
+	public String mainPage(HttpSession session, Model model) {
+		
+		MemberDTO checkUser = (MemberDTO) session.getAttribute("member");
+		
+		if(checkUser == null || !checkUser.getRole().equalsIgnoreCase("ADMIN")) {
+			return "redirect:/";
+		}
+		
+		int totalCount = boardService.getTotalCount();
+		int todayCount = boardService.getTodayCount();
+		int totalMemberCount = memberService.getTotalMemberCount();
+		List<MemberDTO> recentMembers = memberService.getRecentMembers();
+		
+		model.addAttribute("boardTotalCount", totalCount);
+		model.addAttribute("boardTodayCount", todayCount);
+		model.addAttribute("totalMemberCount", totalMemberCount);
+		model.addAttribute("recentMembers", recentMembers);
+		
+		return "admin/main";
+	}
+	
+	// 게시물 관리 페이지
+	@GetMapping("board/list")
+	public String boardList(Model model) {
+		
+		List<BoardDTO> list = boardService.selectAll();
+		
+		model.addAttribute("boardList", list);
+		
+		return "admin/board/boardList";
+	}
+	
+	// 회원 관리 페이지
+	@GetMapping("member/list")
+	public String memberList(Model model) {
+		
+		List<MemberDTO> list = memberService.selectAll();
+		
+		model.addAttribute("memberList", list);
+		
+		return "admin/member/memberList";
+	}
+	
+	//관리자용 회원 상태 변경
+	@PostMapping("/updateEnabled")
+	public String updateEnabled(@RequestParam("id") String id,
+								@RequestParam("enabled") boolean enabled,
+								RedirectAttributes rttr) {
+		
+		memberService.updateEnabled(id, enabled);
+		
+		String status = (enabled ? "활성화" : "비활성화(탈퇴)");
+		rttr.addFlashAttribute("msg", id + " 계정이 " + status + " 처리되었습니다.");
+		
+		return "redirect:/admin/member/list";
+	}
+	
+}

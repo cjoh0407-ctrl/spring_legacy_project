@@ -1,0 +1,66 @@
+package controller;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import dto.BoardDTO;
+import dto.MemberDTO;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.BoardService;
+import service.MemberService;
+
+@Controller
+@Log4j2
+@RequestMapping("/admin")
+@RequiredArgsConstructor
+public class AdminController {
+
+	private final BoardService boardService;
+	private final MemberService memberService;
+	
+	@GetMapping("/main")
+	public String mainPage(HttpSession session, Model model) {
+		
+		MemberDTO checkUser = (MemberDTO) session.getAttribute("member");
+		
+		if(checkUser == null || !checkUser.getRole().equalsIgnoreCase("ADMIN")) {
+			return "redirect:/";
+		}
+		
+		int totalCount = boardService.getTotalCount();
+		int todayCount = boardService.getTodayCount();
+		int totalMemberCount = memberService.getTotalMemberCount();
+		List<MemberDTO> recentMembers = memberService.getRecentMembers();
+		
+		model.addAttribute("boardTotalCount", totalCount);
+		model.addAttribute("boardTodayCount", todayCount);
+		model.addAttribute("totalMemberCount", totalMemberCount);
+		model.addAttribute("recentMembers", recentMembers);
+		
+		return "admin/main";
+	}
+	
+	@GetMapping("board/list")
+	public String boardList(Model model) {
+		
+		List<BoardDTO> list = boardService.selectAll();
+		
+		model.addAttribute("boardList", list);
+		
+		return "admin/board/boardList";
+	}
+	
+	@GetMapping("member/list")
+	public String memberList(Model model) {
+		
+		
+		
+		return "admin/member/memberList";
+	}
+}

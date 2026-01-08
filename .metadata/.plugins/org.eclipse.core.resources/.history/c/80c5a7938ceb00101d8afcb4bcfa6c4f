@@ -1,0 +1,245 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>관리자 - 회원 관리</title>
+<style>
+    /* 기존 스타일 유지 */
+    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; display: flex; background-color: #f4f7f6; }
+    .sidebar { width: 240px; background: #2c3e50; color: white; height: 100vh; position: fixed; }
+    .sidebar-header { padding: 20px; text-align: center; background: #1a252f; font-size: 20px; font-weight: bold; }
+    .sidebar-menu { padding: 0; list-style: none; }
+    .sidebar-menu li a { display: block; padding: 15px 25px; color: #bdc3c7; text-decoration: none; border-bottom: 1px solid #34495e; }
+    .sidebar-menu li a:hover { background: #34495e; color: white; }
+    .sidebar-menu li a.active { background: #3498db; color: white; }
+    .main-content { margin-left: 240px; width: calc(100% - 240px); }
+    .admin-header { height: 60px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; }
+    .container { padding: 30px; }
+    .page-title { margin-bottom: 10px; color: #333; }
+    
+    /* 검색창 스타일 추가 */
+    .search-wrapper { margin-bottom: 20px; display: flex; justify-content: flex-end; gap: 8px; }
+    .search-wrapper select, .search-wrapper input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; outline: none; }
+    .search-wrapper button { padding: 8px 18px; background: #2c3e50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+    .search-wrapper button:hover { background: #1a252f; }
+
+    .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .admin-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #dee2e6; color: #495057; font-size: 14px; }
+    .admin-table td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-size: 14px; color: #666; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+    .badge-admin { background: #e8f4fd; color: #3498db; }
+    .badge-user { background: #f1f3f5; color: #868e96; }
+    .badge-active { background: #e6fffa; color: #38b2ac; }
+    .badge-disabled { background: #fff5f5; color: #e74c3c; }
+    .disabled-row { background-color: #fcfcfc; }
+    .disabled-row td { color: #ccc !important; }
+    .btn-action { border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; min-width: 70px; }
+    .btn-kick { background: #e74c3c; color: white; }
+    .btn-restore { background: #3498db; color: white; }
+
+    .pagination { display: flex; justify-content: center; list-style: none; padding: 0; margin-top: 30px; gap: 5px; }
+    .pagination li a { display: block; padding: 8px 14px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px; background: white; }
+    .pagination li.active a { background: #3498db; color: white; border-color: #3498db; }
+    .pagination li a:hover:not(.active) { background: #f4f4f4; }
+</style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">회원 관리 페이지</div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/main">대시보드 메인</a></li>
+            <li><a href="/admin/board/list">게시판 관리</a></li>
+            <li><a href="/admin/member/list" class="active">회원 관리</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header class="admin-header">
+            <span>관리자 <b>${sessionScope.member.name}</b>님</span>
+            <a href="/member/logout" style="margin-left:15px; color:#e74c3c; text-decoration:none; font-size:13px;">로그아웃</a>
+        </header>
+
+        <div class="container">
+            <h1 class="page-title">회원 관리</h1>
+            <p style="color: #888; margin-bottom: 25px;">회원 활성화 및 차단 상태를 관리합니다.</p>
+
+            <div class="search-wrapper">
+                <select id="searchType">
+                    <option value="i">아이디</option>
+                    <option value="n">이름</option>
+                    <option value="e">이메일</option>
+                    <option value="p">전화번호</option>
+                </select>
+                <input type="text" id="searchKeyword" placeholder="검색어를 입력하세요">
+                <button type="button" onclick="loadMemberList(1)">검색</button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th width="100">상태</th>
+                        <th width="150">아이디</th>
+                        <th width="120">이름</th>
+                        <th>이메일</th>
+                        <th width="100">권한</th>
+                        <th width="120">가입일</th>
+                        <th width="120">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="memberListBody">
+                    <tr><td colspan="7" style="padding:50px;">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+
+            <ul class="pagination" id="memberPaging"></ul>
+        </div>
+    </div>
+
+<script>
+    const loginId = "${sessionScope.member.id}";
+    let currentPage = 1;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // 엔터키 검색 지원
+        document.getElementById("searchKeyword").addEventListener("keypress", function(e) {
+            if(e.key === 'Enter') loadMemberList(1);
+        });
+        loadMemberList(1);
+    });
+
+    // 1. 회원 목록 로드 (검색 조건 포함)
+    function loadMemberList(page) {
+        currentPage = page;
+        
+        const type = document.getElementById("searchType").value;
+        const keyword = document.getElementById("searchKeyword").value;
+        
+        // 검색 파라미터 types, keyword를 URL에 붙여서 전송
+        const url = "/admin/member/api/list?page=" + page + 
+                    "&size=10&types=" + type + 
+                    "&keyword=" + encodeURIComponent(keyword);
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                // 서버에서 넘겨주는 리스트 변수명이 memberDTOList인지 확인하세요!
+                printTable(data.memberDTOList); 
+                printPaging(data);
+            })
+            .catch(err => {
+                console.error("회원 로드 실패:", err);
+                document.getElementById("memberListBody").innerHTML = '<tr><td colspan="7" style="padding:50px; color:red;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+            });
+    }
+
+    // 2. 테이블 그리기
+    function printTable(list) {
+	    const tbody = document.getElementById("memberListBody");
+	    let str = "";
+	    
+	    // 1. 데이터가 아예 없는 경우 체크
+	    if(!list || list.length === 0) {
+	        tbody.innerHTML = '<tr><td colspan="7" style="padding:50px; color:#ccc;">검색 결과가 없습니다.</td></tr>';
+	        return;
+	    }
+	
+	    try {
+	        list.forEach(m => {
+	            // 2. 날짜 처리 (regdateShort가 안 넘어올 경우를 대비한 방어 로직)
+	            let displayDate = "-";
+	            if (m.regdateShort) {
+	                displayDate = m.regdateShort;
+	            } else if (m.regdate) {
+	                // regdate가 문자열인 경우 "2024-05-20" 까지만 자름
+	                displayDate = typeof m.regdate === 'string' ? m.regdate.substring(0, 10) : m.regdate;
+	            }
+	
+	            // 3. 필드값 매핑 (m.id, m.name 등이 맞는지 확인)
+	            const mid = m.id || "아이디없음";
+	            const mname = m.name || "이름없음";
+	            const memail = m.email || "-";
+	            const mrole = m.role || "USER";
+	            const enabled = (m.enabled === true || m.enabled === "true" || m.enabled === 1); // 불리언 체크
+	
+	            const disabledClass = enabled ? "" : "disabled-row";
+	            const statusBadge = enabled ? "badge-active" : "badge-disabled";
+	            const statusText = enabled ? "활동중" : "탈퇴됨";
+	            const roleBadge = mrole === 'ADMIN' ? "badge-admin" : "badge-user";
+	
+	            str += `<tr class="${disabledClass}">`;
+	            str += `    <td><span class="badge ${statusBadge}">${statusText}</span></td>`;
+	            str += `    <td><b>${mid}</b></td>`;
+	            str += `    <td>${mname}</td>`;
+	            str += `    <td>${memail}</td>`;
+	            str += `    <td><span class="badge ${roleBadge}">${mrole}</span></td>`;
+	            str += `    <td>${displayDate}</td>`;
+	            str += `    <td>`;
+	            
+	            if(mid !== loginId) {
+	                if(enabled) {
+	                    str += `<button type="button" class="btn-action btn-kick" onclick="changeStatus('${mid}', false)">탈퇴</button>`;
+	                } else {
+	                    str += `<button type="button" class="btn-action btn-restore" onclick="changeStatus('${mid}', true)">복구</button>`;
+	                }
+	            } else {
+	                str += `<span style="font-size: 11px; color: #3498db; font-weight: bold; background: #e8f4fd; padding: 5px 10px; border-radius: 4px;">나</span>`;
+	            }
+	            
+	            str += `    </td>`;
+	            str += `</tr>`;
+	        });
+	        tbody.innerHTML = str;
+	    } catch (e) {
+	        console.error("테이블 렌더링 중 에러 발생:", e);
+	        tbody.innerHTML = '<tr><td colspan="7" style="padding:50px; color:red;">데이터 표시 중 에러가 발생했습니다. (F12 콘솔 확인)</td></tr>';
+	    }
+	}
+
+    // 3. 페이징 그리기
+    function printPaging(data) {
+        const pagingUl = document.getElementById("memberPaging");
+        let str = "";
+        
+        // 이전 버튼
+        if(data.prev) {
+            str += `<li><a href="javascript:loadMemberList(${data.start - 1})">이전</a></li>`;
+        }
+        
+        // 페이지 번호 (IntStream으로 넘어온 리스트)
+        data.pageNums.forEach(num => {
+            const activeClass = (data.page === num) ? "active" : "";
+            str += `<li class="${activeClass}"><a href="javascript:loadMemberList(${num})">${num}</a></li>`;
+        });
+        
+        // 다음 버튼
+        if(data.next) {
+            str += `<li><a href="javascript:loadMemberList(${data.end + 1})">다음</a></li>`;
+        }
+        
+        pagingUl.innerHTML = str;
+    }
+
+    // 4. 상태 변경 (탈퇴/복구)
+    function changeStatus(id, enabled) {
+        const msg = enabled ? "복구하시겠습니까?" : "강제탈퇴 시키겠습니까?";
+        if(!confirm(id + "님을 " + msg)) return;
+
+        fetch("/admin/updateEnabled", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: "id=" + id + "&enabled=" + enabled
+        })
+        .then(res => res.text())
+        .then(message => {
+            alert(message);
+            loadMemberList(currentPage); // 현재 보던 페이지 유지하며 갱신
+        })
+        .catch(err => alert("상태 변경 중 오류 발생"));
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ReplyMapper">
+
+<!-- /*
+ * CREATE TABLE reply (
+    rno INT AUTO_INCREMENT PRIMARY KEY,   -- 댓글 번호 (자동 증가)
+    bno INT NOT NULL,                      -- 게시글 번호 (외래키)
+    replyText VARCHAR(500) NOT NULL,      -- 댓글 내용
+    replyer VARCHAR(50) NOT NULL,         -- 댓글 작성자 아이디
+    replydate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 댓글 작성일시
+    updatedate TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 댓글 수정일시
+        ON UPDATE CURRENT_TIMESTAMP,
+    delflag BOOLEAN DEFAULT FALSE,         -- 삭제 여부 (논리적 삭제)
+    
+    CONSTRAINT fk_reply_board
+    FOREIGN KEY (bno) REFERENCES board(seq) ON DELETE CASCADE
+);
+ */ -->
+
+<insert id="insert" parameterType="dto.ReplyDTO">
+	insert into reply (replyText, replyer, replydate)
+	values (#{replyText}, #{replyer}, #{replydate})
+</insert>
+
+<select id="read" resultType="dto.ReplyDTO">
+	select * from reply
+</select>
+
+</mapper>

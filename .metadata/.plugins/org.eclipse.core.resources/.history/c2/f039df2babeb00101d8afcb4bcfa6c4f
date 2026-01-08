@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ═══════════════════════════════════════════════════════════════════
+     root-context.xml
+     
+     🎯 역할: 백엔드 핵심 Bean 설정
+     • 데이터베이스 연결
+     • Service, Mapper 빈 등록
+     • 트랜잭션 관리
+     • 보안(Security) 설정
+     ═══════════════════════════════════════════════════════════════════ -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+            https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+            https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx 
+            https://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop 
+            https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://mybatis.org/schema/mybatis-spring 
+            http://mybatis.org/schema/mybatis-spring.xsd">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         1️⃣ 컴포넌트 스캔 (Component Scan)
+         
+         🎯 목적: @Service, @Component, @Configuration 등의 
+                  어노테이션이 붙은 클래스를 자동으로 Bean으로 등록
+         
+         📦 스캔 대상:
+         • org.zerock.service : 비즈니스 로직 (BoardService, MemberService 등)
+         • org.zerock.security : 보안 설정 (SecurityConfig 등)
+         ═══════════════════════════════════════════════════════════ -->
+    <context:component-scan base-package="mapper" />
+    <context:component-scan base-package="service" />
+    <context:component-scan base-package="security" />
+
+    <!-- ═══════════════════════════════════════════════════════════
+         2️⃣ HikariCP DataSource 설정
+         
+         🎯 목적: 데이터베이스 연결 풀(Connection Pool) 관리
+         
+         📌 HikariCP란?
+         • 매우 빠르고 가벼운 JDBC 커넥션 풀 라이브러리
+         • 미리 여러 개의 DB 연결을 만들어두고 재사용 (성능 향상!)
+         
+         ⚙️ 주요 설정값:
+         • minimumIdle : 최소 유지할 연결 수 (2개)
+         • maximumPoolSize : 최대 연결 수 (10개)
+         • connectionTimeout : 연결 대기 시간 (30초)
+         ═══════════════════════════════════════════════════════════ -->
+    <bean name="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+        <!-- MySQL 드라이버 클래스 -->
+        <property name="driverClassName" 
+                  value="com.mysql.cj.jdbc.Driver" />
+        
+        <!-- JDBC URL (데이터베이스 주소) -->
+        <property name="jdbcUrl"
+            value="jdbc:mysql://localhost:3306/board
+                   ?serverTimezone=Asia/Seoul
+                   &amp;characterEncoding=UTF-8" />
+        
+        <!-- 데이터베이스 사용자 정보 -->
+        <property name="username" value="root" />
+        <property name="password" value="1234" />
+        
+        <!-- 연결 풀 설정 -->
+        <property name="connectionTimeout" value="30000" />  <!-- 30초 -->
+        <property name="minimumIdle" value="2" />            <!-- 최소 2개 연결 유지 -->
+        <property name="maximumPoolSize" value="10" />       <!-- 최대 10개 연결 -->
+    </bean>
+
+    <!-- 실제 DataSource 객체 생성 -->
+    <bean name="dataSource" 
+          class="com.zaxxer.hikari.HikariDataSource" 
+          destroy-method="close">
+        <constructor-arg ref="hikariConfig" />
+    </bean>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         3️⃣ MyBatis SqlSessionFactory 설정
+         
+         🎯 목적: MyBatis가 SQL을 실행할 수 있도록 설정
+         
+         📌 SqlSessionFactory란?
+         • MyBatis의 핵심 객체
+         • Mapper XML 파일과 Java 인터페이스를 연결
+         • SQL 실행 및 결과 매핑 담당
+         ═══════════════════════════════════════════════════════════ -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- DB 연결을 위해 위에서 만든 dataSource 사용 -->
+        <property name="dataSource" ref="dataSource" />
+        
+        <!-- SQL이 작성된 Mapper XML 파일 위치 -->
+        <property name="mapperLocations" 
+                  value="classpath:/mapper/*.xml" />
+        
+        <!-- MyBatis 추가 설정 파일 -->
+        <property name="configLocation" 
+                  value="classpath:mybatis-config.xml" />
+    </bean>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         4️⃣ 트랜잭션 관리자 설정
+         
+         🎯 목적: 여러 DB 작업을 하나의 단위로 묶어서 처리
+         
+         📌 트랜잭션이란?
+         • "전부 성공" 또는 "전부 실패" 단위
+         • 예: 게시글 작성 중 에러 발생 시 모든 변경 취소
+         ═══════════════════════════════════════════════════════════ -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- @Transactional 어노테이션 활성화 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <!-- ═══════════════════════════════════════════════════════════
+         5️⃣ MyBatis Mapper 스캔
+         
+         🎯 목적: @Mapper 어노테이션이 붙은 인터페이스를 자동으로 Bean 등록
+         
+         📦 스캔 대상: org.zerock.mapper 패키지의 모든 Mapper 인터페이스
+         ═══════════════════════════════════════════════════════════ -->
+    <mybatis-spring:scan base-package="mapper" />
+	
+    <!-- ═══════════════════════════════════════════════════════════
+         6️⃣ AOP 자동 프록시 설정
+         
+         🎯 목적: @Transactional, 로깅 등 공통 기능을 메서드에 자동 적용
+         
+         📌 AOP란?
+         • Aspect Oriented Programming (관점 지향 프로그래밍)
+         • 공통 기능(로깅, 트랜잭션 등)을 분리하여 관리
+         ═══════════════════════════════════════════════════════════ -->
+    <aop:aspectj-autoproxy />
+    <context:component-scan base-package="security" />
+		<context:annotation-config />
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+</beans>

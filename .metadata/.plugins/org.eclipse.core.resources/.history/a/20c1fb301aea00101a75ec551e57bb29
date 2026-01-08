@@ -1,0 +1,53 @@
+package mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import dto.BoardDTO;
+import dto.BoardListPaginDTO;
+
+/*
+ * private int seq;
+	private String writer;
+	private String title;
+	private String content;
+	private int hit;
+	private LocalDateTime regdate;
+	private LocalDateTime updatedate;
+	private boolean delflage;
+ */
+
+@Mapper
+public interface BoardMapper {
+
+	List<BoardDTO> selectAll();	// 전체 조회
+	
+	
+	BoardDTO detailByOne(int seq);		// 1개 상세보기
+	
+	
+	void insert(BoardDTO dto);		// insert 추가
+	
+	
+	void delete(int seq); 		// delete 삭제
+	
+	
+	void update(BoardDTO dto);		// update 수정
+	
+	
+	void plusHit(int seq);	// 조회수 +1
+	
+	
+	int getTotalCount(); // 총 게시물 수
+	
+	
+	int getTodayCount(); // 오늘 게시물 수
+	
+	
+	BoardListPaginDTO getListPaging(@Param("skip") int skip, @Param("size") int size); //페이징 처리 리스트 가져오기.
+	
+	
+	int getPagingCount(); // 페이징 처리를 위한 게시물 개수 카운트
+}

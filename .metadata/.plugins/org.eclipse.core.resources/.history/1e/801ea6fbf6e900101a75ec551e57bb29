@@ -1,0 +1,45 @@
+package mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+
+import dto.BoardDTO;
+
+/*
+ * private int seq;
+	private String writer;
+	private String title;
+	private String content;
+	private int hit;
+	private LocalDateTime regdate;
+	private LocalDateTime updatedate;
+	private boolean delflage;
+ */
+
+@Mapper
+public interface BoardMapper {
+
+	List<BoardDTO> selectAll();	// 전체 조회
+	
+	
+	BoardDTO detailByOne(int seq);		// 1개 상세보기
+	
+	
+	void insert(BoardDTO dto);		// insert 추가
+	
+	
+	void delete(int seq); 		// delete 삭제
+	
+	
+	void update(BoardDTO dto);		// update 수정
+	
+	
+	void plusHit(int seq);	// 조회수 +1
+	
+	
+	BoardDTO getTotalCount(); // 총 게시물 수
+	
+	
+	BoardDTO getTodayCount(); // 오늘 게시물 수
+}

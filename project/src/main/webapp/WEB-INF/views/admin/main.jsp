@@ -1,12 +1,138 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>관리자 페이지 - 메인</title>
+<style>
+    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; display: flex; background-color: #f4f7f6; }
+    
+    /* 사이드바 스타일 */
+    .sidebar { width: 240px; background: #2c3e50; color: white; height: 100vh; position: fixed; }
+    .sidebar-header { padding: 20px; text-align: center; background: #1a252f; font-size: 20px; font-weight: bold; }
+    .sidebar-menu { padding: 0; list-style: none; }
+    .sidebar-menu li a { display: block; padding: 15px 25px; color: #bdc3c7; text-decoration: none; border-bottom: 1px solid #34495e; transition: 0.3s; }
+    .sidebar-menu li a:hover { background: #34495e; color: white; }
+    .sidebar-menu li a.active { background: #3498db; color: white; }
+
+    /* 메인 영역 스타일 */
+    .main-content { margin-left: 240px; width: calc(100% - 240px); display: flex; flex-direction: column; }
+    
+    /* 대시보드 내용 */
+    .container { padding: 30px; }
+    .dashboard-cards { display: flex; gap: 20px; margin-top: 20px; }
+    .card { background: white; padding: 20px; border-radius: 8px; flex: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #3498db; }
+    .card h3 { margin: 0; font-size: 14px; color: #7f8c8d; }
+    .card .value { font-size: 28px; font-weight: bold; margin-top: 10px; color: #2c3e50; }
+    
+    /* 최근 가입자 섹션 컨테이너 */
+	.recent-members-section {
+	    margin-top: 40px;
+	    background: white;
+	    padding: 25px;
+	    border-radius: 12px;
+	    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+	}
+	
+	.recent-members-section h3 {
+	    margin-top: 0;
+	    margin-bottom: 20px;
+	    font-size: 18px;
+	    color: #2c3e50;
+	    display: flex;
+	    align-items: center;
+	    gap: 10px;
+	}
+	
+	.recent-members-section h3::before {
+	    content: "";
+	    display: inline-block;
+	    width: 8px;
+	    height: 8px;
+	    background-color: #3498db;
+	    border-radius: 50%;
+	}
+	
+	.admin-mini-table { width: 100%; border-collapse: collapse; }
+	.admin-mini-table th {
+	    background-color: #f8f9fa;
+	    color: #7f8c8d;
+	    font-size: 13px;
+	    font-weight: 600;
+	    padding: 12px 15px;
+	    text-align: left;
+	    border-top: 1px solid #edf2f7;
+	    border-bottom: 2px solid #edf2f7;
+	}
+	.admin-mini-table td { padding: 14px 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #4a5568; }
+	.admin-mini-table tr:last-child td { border-bottom: none; }
+	.admin-mini-table tr:hover { background-color: #fcfdfe; }
+	.user-id { font-weight: bold; color: #2d3748; }
+	.reg-date { color: #a0aec0; font-size: 12px; }
+</style>
 </head>
 <body>
-<h1>여기는 관리자 페이지 입니다.</h1>
+
+    <div class="sidebar">
+        <div class="sidebar-header">관리자 페이지</div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/main" class="active">대시보드 메인</a></li>
+            <li><a href="/admin/board/list">게시판 관리</a></li>
+            <li><a href="/admin/member/list">회원 관리</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <jsp:include page="/WEB-INF/views/common/adminHeader.jsp" />
+
+        <div class="container">
+            <h1>대시보드</h1>
+            <p>사이트의 현재 현황을 요약해서 보여줍니다.</p>
+            
+            <div class="dashboard-cards">
+			    <div class="card">
+			        <h3>총 게시글 수</h3>
+			        <div class="value">${boardTotalCount} 개</div>
+			    </div>
+			    <div class="card" style="border-left-color: #2ecc71;">
+			        <h3>총 회원 수</h3>
+			        <div class="value">${totalMemberCount} 명</div>
+			    </div>
+			    <div class="card" style="border-left-color: #f1c40f;">
+			        <h3>신규 게시글 (오늘)</h3>
+			        <div class="value">${boardTodayCount} 건</div>
+			    </div>
+			</div>
+			
+			<div class="recent-members-section">
+			    <h3>최근 가입자 알림</h3>
+			    <table class="admin-mini-table">
+			        <thead>
+			            <tr>
+			                <th width="30%">아이디</th>
+			                <th width="30%">이름</th>
+			                <th width="40%">가입일</th>
+			            </tr>
+			        </thead>
+			        <tbody>
+			            <c:forEach var="m" items="${recentMembers}">
+			                <tr>
+			                    <td class="user-id">${m.id}</td>
+			                    <td>${m.name}</td>
+			                    <td class="reg-date">${m.regdateShort}</td>
+			                </tr>
+			            </c:forEach>
+			            <c:if test="${empty recentMembers}">
+			                <tr>
+			                    <td colspan="3" style="text-align:center; color:#ccc; padding:30px;">최근 가입자가 없습니다.</td>
+			                </tr>
+			            </c:if>
+			        </tbody>
+			    </table>
+			</div>
+        </div>
+    </div>
+
 </body>
 </html>

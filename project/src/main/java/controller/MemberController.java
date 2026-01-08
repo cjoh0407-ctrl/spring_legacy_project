@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import dto.MemberDTO;
@@ -25,6 +26,13 @@ public class MemberController {
 	
 	private final MemberService memberService;
 
+	
+	@GetMapping("/")
+	public String index() {
+		return "login";
+	}
+	
+	
 	
 	@GetMapping("/list")
 	public String list(Model model) {
@@ -66,6 +74,7 @@ public class MemberController {
 		return "redirect:/";
 	}
 	
+	/*
 	@PostMapping("/login")
 	public String login(@RequestParam("id")String id,
 						@RequestParam("password")String password, 
@@ -76,6 +85,12 @@ public class MemberController {
 	    MemberDTO loginMember = memberService.selectById(id);
 	    
 	    if (loginMember != null && loginMember.getPassword().equals(password)) {
+	    	
+	    	if(!loginMember.isEnabled()) {
+	    		rttr.addFlashAttribute("error", "탈퇴 처리된 계정입니다. 관리자에게 문의하세요.");
+	    		return "redirect:/member/";
+	    	}
+	    	
 	        // [로그인 성공]
 	        // 세션에 로그인 정보를 저장 (브라우저를 닫기 전까지 유지됨)
 	        session.setAttribute("member", loginMember);
@@ -94,9 +109,10 @@ public class MemberController {
 	    } else {
 	        // [로그인 실패]
 	        rttr.addFlashAttribute("error", "아이디 또는 비밀번호가 틀렸습니다.");
-	        return "redirect:/"; // 다시 로그인 페이지(메인)로
+	        return "redirect:/member/"; // 다시 로그인 페이지(메인)로
 	    }
 	}
+	*/
 	
 	
 	// 회원 정보 수정 페이지
@@ -111,9 +127,18 @@ public class MemberController {
 	
 	//회원 정보 수정 업데이트 이후 게시판으로 리다이렉트
 	@PostMapping("/update")
-	public String update(MemberDTO dto) {
+	public String update(MemberDTO dto, HttpSession session) {
 		memberService.update(dto);
-		return "redirect:/board/list";
+		
+		MemberDTO user = (MemberDTO) session.getAttribute("member");
+		
+		session.setAttribute("member", memberService.selectById(dto.getId()));
+		
+		if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+			return "redirect:/admin/main";
+		}else {
+			return "redirect:/board/list";
+		}
 	}
 	
 	//회원탈퇴
@@ -134,6 +159,17 @@ public class MemberController {
 		return "redirect:/";
 	}
 	
+	//403 페이지로 이동
+	@GetMapping("/access-denied")
+	public String accessDenied() {
+	    // DB 작업이 없으므로 서비스 호출 필요 없음!
+	    // /WEB-INF/views/member/access-denied.jsp 를 찾아가도록 리턴
+	    return "member/access-denied";
+	}
+	
+
+	
+
 	
 	
 }

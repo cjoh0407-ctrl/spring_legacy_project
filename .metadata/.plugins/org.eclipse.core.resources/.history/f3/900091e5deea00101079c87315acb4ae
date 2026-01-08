@@ -1,0 +1,101 @@
+package mapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.ReplyDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class ReplyMapperTest {
+	
+	@Autowired
+	private ReplyMapper replyMapper;
+
+	@Test
+	void testInsert() {
+		//given
+		ReplyDTO replyDTO = ReplyDTO.builder()
+						.bno(1)
+						.replyer("test")
+						.replyText("test")
+						.build();
+		
+		
+		//when
+		replyMapper.insert(replyDTO);
+		
+		//then
+		ReplyDTO result = replyMapper.read(1);
+		log.info(result);
+	}
+	
+	@Test
+	void testRead() {
+		//given
+		
+		
+		//when
+		ReplyDTO result = replyMapper.read(1);
+		
+		//then
+		assertNotNull(result);
+		log.info(result);
+		
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		
+		//when
+		replyMapper.delete(1);
+		
+		ReplyDTO result = replyMapper.read(1);
+		
+		//then
+		assertTrue(result.isDelflag());
+		log.info(result);
+	}
+	
+	@Test
+	void testUpdate() {
+		//given
+		ReplyDTO replyDTO = ReplyDTO.builder()
+						.rno(1)
+						.replyText("testUpdate")
+						.build();
+		
+		
+		//when
+		replyMapper.update(replyDTO);
+		
+		//then
+		ReplyDTO result = replyMapper.read(1);
+		log.info(result);
+		
+	}
+	
+	
+	@Test
+	void testListOfBoard() {
+		//given
+		
+		
+		//when
+		List<ReplyDTO> list = replyMapper.listOfBoard(1, 0, 5);
+		
+		//then
+		assertNotNull(list);
+		list.forEach(m -> log.info(m));
+	}
+}

@@ -57,7 +57,7 @@
          • "springSecurityFilterChain" : Spring Security가 자동 생성한 필터 체인
          • 모든 요청에 대해 보안 검사 수행
          ═══════════════════════════════════════════════════════════ -->
-    <!-- <filter>
+     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>
             org.springframework.web.filter.DelegatingFilterProxy
@@ -66,8 +66,8 @@
 
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>  모든 URL에 보안 필터 적용
-    </filter-mapping> -->
+        <url-pattern>/*</url-pattern>  <!-- 모든 URL에 보안 필터 적용 -->
+    </filter-mapping>
 
     <!-- ═══════════════════════════════════════════════════════════
          4️⃣ Root Application Context 설정 (리스너)
@@ -84,7 +84,6 @@
         </listener-class>
     </listener>
 
-    <!-- root-context.xml 파일 위치 지정 -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/spring/root-context.xml</param-value>
@@ -142,6 +141,7 @@
          
          • 순서대로 찾아서 첫 번째로 존재하는 파일 표시
          ═══════════════════════════════════════════════════════════ -->
+
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>

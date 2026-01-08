@@ -58,9 +58,12 @@
 <div class="container">
     <h2>게시글 수정</h2>
     
-    <form action="/board/update" method="post"> <%-- 폼 전송 주소를 /board/update로 설정 --%>
-        <%-- 중요: 수정할 게시글의 고유 번호를 숨겨서 보냅니다 --%>
+    <form action="/board/update" method="post">
         <input type="hidden" name="seq" value="${board.seq}">
+        
+        <input type="hidden" name="page" value="${page}">
+        <input type="hidden" name="types" value="${types}">
+        <input type="hidden" name="keyword" value="${keyword}">
 
         <div class="form-group">
             <label for="title">제목</label>
@@ -69,7 +72,6 @@
 
         <div class="form-group">
             <label for="writer">작성자</label>
-            <%-- 작성자는 수정 불가능하게 readonly 처리 --%>
             <input type="text" id="writer" name="writer" class="form-control" value="${board.writer}" readonly>
         </div>
 
@@ -79,8 +81,7 @@
         </div>
 
         <div class="btn-area">
-            <%-- 취소 버튼: 이전 페이지(detail.jsp)로 돌아감 --%>
-            <a href="javascript:history.back();" class="btn btn-cancel">취소</a>
+            <a href="/board/detail?seq=${board.seq}&page=${page}&types=${types}&keyword=${keyword}" class="btn btn-cancel">취소</a>
             <button type="submit" class="btn btn-submit">수정 완료</button>
         </div>
     </form>

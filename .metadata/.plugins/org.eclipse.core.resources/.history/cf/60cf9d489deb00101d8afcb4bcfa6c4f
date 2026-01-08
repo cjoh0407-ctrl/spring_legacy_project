@@ -1,0 +1,194 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>관리자 - 게시판 관리</title>
+<style>
+    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; display: flex; background-color: #f4f7f6; }
+    .sidebar { width: 240px; background: #2c3e50; color: white; height: 100vh; position: fixed; }
+    .sidebar-header { padding: 20px; text-align: center; background: #1a252f; font-size: 20px; font-weight: bold; }
+    .sidebar-menu { padding: 0; list-style: none; }
+    .sidebar-menu li a { display: block; padding: 15px 25px; color: #bdc3c7; text-decoration: none; border-bottom: 1px solid #34495e; }
+    .sidebar-menu li a:hover { background: #34495e; color: white; }
+    .sidebar-menu li a.active { background: #3498db; color: white; }
+    .main-content { margin-left: 240px; width: calc(100% - 240px); }
+    .admin-header { height: 60px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; }
+    .container { padding: 30px; }
+    .page-title { margin-bottom: 20px; color: #333; }
+    
+    .search-area { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .search-area select, .search-area input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    .btn-search { background: #34495e; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; }
+
+    .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .admin-table th { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #dee2e6; color: #495057; font-size: 14px; }
+    .admin-table td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-size: 14px; color: #666; }
+    
+    /* 삭제된 게시글 스타일 (delflag == 1) */
+    .deleted-row { background-color: #fafafa; }
+    .deleted-row td { color: #ccc !important; }
+    .deleted-title { text-decoration: line-through; color: #bbb !important; }
+
+    .title-cell { text-align: left !important; }
+    .title-cell a { color: #333; text-decoration: none; font-weight: bold; }
+    
+    /* 버튼 스타일 */
+    .btn-action { border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: white; min-width: 60px; }
+    .btn-delete { background: #e74c3c; } /* 삭제: 빨간색 */
+    .btn-restore { background: #2ecc71; } /* 복원: 초록색 */
+
+    .pagination { display: flex; justify-content: center; list-style: none; padding: 0; margin-top: 30px; gap: 5px; }
+    .pagination li a { display: block; padding: 8px 14px; border: 1px solid #ddd; text-decoration: none; color: #333; border-radius: 4px; background: white; }
+    .pagination li.active a { background: #3498db; color: white; border-color: #3498db; }
+</style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">게시판 관리</div>
+        <ul class="sidebar-menu">
+            <li><a href="/admin/main">대시보드 메인</a></li>
+            <li><a href="/admin/board/list" class="active">게시판 관리</a></li>
+            <li><a href="/admin/member/list">회원 관리</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header class="admin-header">
+            <span>관리자 <b>${sessionScope.member.name}</b>님</span>
+            <a href="/member/logout" style="margin-left:15px; color:#e74c3c; text-decoration:none; font-size:13px;">로그아웃</a>
+        </header>
+
+        <div class="container">
+            <h1 class="page-title">게시판 관리</h1>
+            
+            <div class="search-area">
+                <select id="searchType">
+                    <option value="t">제목</option>
+                    <option value="c">내용</option>
+                    <option value="w">작성자</option>
+                    <option value="tc">제목+내용</option>
+                </select>
+                <input type="text" id="searchKeyword" placeholder="검색어를 입력하세요" onkeyup="if(window.event.keyCode==13){loadAdminList(1)}">
+                <button type="button" class="btn-search" onclick="loadAdminList(1)">검색</button>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th width="130">번호</th>
+                        <th>제목</th>
+                        <th width="150">작성자</th>
+                        <th width="150">작성일</th>
+                        <th width="80">조회수</th>
+                        <th width="100">상태변경</th>
+                    </tr>
+                </thead>
+                <tbody id="adminBoardList">
+                    <tr><td colspan="6" style="padding:50px;">데이터를 불러오는 중...</td></tr>
+                </tbody>
+            </table>
+
+            <ul class="pagination" id="adminPaging"></ul>
+        </div>
+    </div>
+
+<script>
+    let currentPage = 1;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        loadAdminList(1);
+    });
+
+    function loadAdminList(page) {
+        currentPage = page;
+        const type = document.getElementById("searchType").value;
+        const keyword = document.getElementById("searchKeyword").value;
+        const url = `/admin/board/api/list?page=\${page}&size=10&types=\${type}&keyword=\${encodeURIComponent(keyword)}`;
+        
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                printTable(data.boardDTOList);
+                printPaging(data);
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("adminBoardList").innerHTML = '<tr><td colspan="6" style="padding:50px; color:red;">데이터 로드 실패</td></tr>';
+            });
+    }
+
+    function printTable(list) {
+        const tbody = document.getElementById("adminBoardList");
+        let str = "";
+        
+        if(list && list.length > 0) {
+            list.forEach(board => {
+                // [수정된 부분] delflag가 1이면 삭제됨, 0이면 정상
+                const isDeleted = (board.delflag == 1); 
+                const rowClass = isDeleted ? "deleted-row" : "";
+                const titleClass = isDeleted ? "deleted-title" : "";
+                
+                // 버튼 분기 처리
+                const actionBtn = isDeleted 
+                    ? `<button type="button" class="btn-action btn-restore" onclick="handleStatus(\${board.seq}, 'restore')">복원</button>`
+                    : `<button type="button" class="btn-action btn-delete" onclick="handleStatus(\${board.seq}, 'delete')">삭제</button>`;
+
+                str += `<tr class="\${rowClass}">
+                    <td>\${board.seq}</td>
+                    <td class="title-cell">
+                        <a href="/board/detail?seq=\${board.seq}" target="_blank" class="\${titleClass}">\${board.title}</a>
+                        \${isDeleted ? ' <small style="color:red; font-weight:normal;">(삭제됨)</small>' : ''}
+                    </td>
+                    <td>\${board.writer}</td>
+                    <td>\${board.regdateShort}</td>
+                    <td>\${board.hit}</td>
+                    <td>\${actionBtn}</td>
+                </tr>`;
+            });
+        } else {
+            str = "<tr><td colspan='6' style='padding:50px; color:#ccc;'>게시글이 존재하지 않습니다.</td></tr>";
+        }
+        tbody.innerHTML = str;
+    }
+
+    function handleStatus(seq, mode) {
+        const actionText = (mode === 'restore') ? "복원" : "삭제";
+        if(!confirm(seq + "번 게시글을 " + actionText + "하시겠습니까?")) return;
+
+        // 서버 주소도 복원/삭제에 맞춰 호출
+        const url = (mode === 'restore') ? "/admin/boardRestore" : "/admin/boardDelete";
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: "seq=" + seq
+        })
+        .then(res => res.text())
+        .then(result => {
+            if(result === "success") {
+                alert(actionText + "되었습니다.");
+                loadAdminList(currentPage);
+            } else {
+                alert(actionText + " 실패");
+            }
+        })
+        .catch(err => alert("오류 발생"));
+    }
+
+    function printPaging(data) {
+        const pagingUl = document.getElementById("adminPaging");
+        let str = "";
+        if(data.prev) str += `<li><a href="javascript:loadAdminList(\${data.start - 1})">이전</a></li>`;
+        data.pageNums.forEach(num => {
+            const activeClass = (data.page === num) ? "active" : "";
+            str += `<li class="\${activeClass}"><a href="javascript:loadAdminList(\${num})">\${num}</a></li>`;
+        });
+        if(data.next) str += `<li><a href="javascript:loadAdminList(\${data.end + 1})">다음</a></li>`;
+        pagingUl.innerHTML = str;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.MemberMapper">
+
+	<!-- 전체 조회 -->
+  <select id="selectAll" resultType="dto.MemberDTO">
+    select *
+    from members
+    order by regdate desc;
+  </select>
+  
+  	<!-- 1개만 조회 -->
+  <select id="selectById" resultType="dto.MemberDTO">
+    select *
+    from members
+    where id = #{id};
+  </select>
+  
+  	<!-- insert 추가하기 -->
+  <insert id="insert" parameterType="dto.MemberDTO"
+  	useGeneratedKeys="true" keyProperty="id">
+    insert into members (id, name, password, email, phone, role)
+    values (#{id}, #{name}, #{password}, #{email}, #{phone}, #{role})
+  </insert>
+  
+  	<!-- update 수정하기 -->
+  <update id="update" parameterType="dto.MemberDTO"
+  	useGeneratedKeys="true" keyProperty="id">
+	UPDATE members
+    	<set>
+        name = #{name},
+        <if test="password != null and password != ''">
+            password = #{password},
+        </if>
+            email = #{email},
+            phone = #{phone}
+    </set>
+    WHERE id = #{id}
+  </update>  
+  
+  	<!-- delete 삭제하기 -->
+  <update id="delete" parameterType="String">
+    update members
+    set enabled = 0
+    where id = #{id};
+  </update>  
+  
+  	<!-- 총 회원 수 -->
+  <select id="getTotalMemberCount" resultType="int">
+  	select count(*) from members
+  	where enabled = 1;
+  </select>
+  
+  	<!-- 최근에 가입한 회원 찾기 -->
+  <select id="getRecentMembers" resultType="dto.MemberDTO">
+  	select * from members
+  	where enabled = 1
+  	order by regdate desc
+  	limit 5;
+  </select>
+  	
+  	<!-- 로그인 가능한 계정인지 체크 -->
+  <select id="login" resultType="dto.MemberDTO">
+  	select * from members
+  	where id = #{id}
+  		and password = #{password}
+  		and enabled = 1
+  </select>
+  
+  	<!-- 계정 활성화 여부 -->
+  <update id="updateEnabled">
+  	update members
+  	set enabled = #{enabled}
+  	where id = #{id}
+  </update>
+  
+  <select id="getListPaging" resultType="dto.MemberDTO">
+	select *
+	from members
+	order by regdate desc
+	limit #{size} offset #{skip};
+  </select>
+
+  <select id="getPagingCount" resultType="int">
+	select count(id)
+	from members
+	where enabled = 1;
+  </select>
+  
+  <select id="memberListSearch" resultType="dto.MemberDTO">
+    SELECT id, name, email, phone, regdate, status
+    FROM members
+    <where>
+        <if test="types != null and keyword != null">
+            <trim prefixOverrides="OR">
+                <choose>
+                    <when test="types == 'i'.toString()">OR id LIKE CONCAT('%', #{keyword}, '%')</when>
+                    <when test="types == 'n'.toString()">OR name LIKE CONCAT('%', #{keyword}, '%')</when>
+                    <when test="types == 'e'.toString()">OR email LIKE CONCAT('%', #{keyword}, '%')</when>
+                    <when test="types == 'p'.toString()">OR phone LIKE CONCAT('%', #{keyword}, '%')</when>
+                </choose>
+            </trim>
+        </if>
+    </where>
+	    ORDER BY regdate DESC
+	    LIMIT #{skip}, #{size}
+	</select>
+	
+	<select id="memberCountSearch" resultType="int">
+	    SELECT COUNT(*) FROM members
+	    <where>
+	        <if test="types != null and keyword != null">
+	            <choose>
+	                <when test="types == 'i'.toString()">AND id LIKE CONCAT('%', #{keyword}, '%')</when>
+	                <when test="types == 'n'.toString()">AND name LIKE CONCAT('%', #{keyword}, '%')</when>
+	                <when test="types == 'e'.toString()">AND email LIKE CONCAT('%', #{keyword}, '%')</when>
+	                <when test="types == 'p'.toString()">AND phone LIKE CONCAT('%', #{keyword}, '%')</when>
+	            </choose>
+	        </if>
+	    </where>
+	</select>
+  
+</mapper>

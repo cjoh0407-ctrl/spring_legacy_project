@@ -1,0 +1,116 @@
+package service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.ReplyDTO;
+import dto.ReplyListPaginDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class ReplyServiceTest {
+
+	@Autowired
+	private ReplyService replyService;
+	
+	@Test
+	void testInsert() {
+		//given
+		ReplyDTO replyDTO = ReplyDTO.builder()
+						.bno(1)
+						.replyer("test")
+						.replyText("test")
+						.build();
+		
+		
+		//when
+		replyService.insert(replyDTO);
+		
+		//then
+		ReplyDTO result = replyService.read(1);
+		log.info(result);
+	}
+	
+	@Test
+	void testRead() {
+		//given
+		
+		
+		//when
+		ReplyDTO result = replyService.read(1);
+		
+		//then
+		assertNotNull(result);
+		log.info(result);
+		
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		
+		//when
+		replyService.delete(1);
+		
+		ReplyDTO result = replyService.read(1);
+		
+		//then
+		assertTrue(result.isDelflag());
+		log.info(result);
+	}
+	
+	@Test
+	void testUpdate() {
+		//given
+		ReplyDTO replyDTO = ReplyDTO.builder()
+						.rno(1)
+						.replyText("testUpdate")
+						.build();
+		
+		
+		//when
+		replyService.update(replyDTO);
+		
+		//then
+		ReplyDTO result = replyService.read(1);
+		log.info(result);
+		
+	}
+	
+	
+	@Test
+	void testListOfBoard() {
+		//given
+		int bno = 1;
+		int page = 1;
+		int size = 10;
+		
+		//when
+		ReplyListPaginDTO list = replyService.listOfBoard(bno, page, size);
+		
+		//then
+		assertNotNull(list);
+		list.getReplyList().forEach(m -> log.info(m));
+	}
+	
+	@Test
+	void testCountOfBoard() {
+		//given
+		
+		//when
+		int result = replyService.countOfBoard(1);
+
+		//then
+		assertNotNull(result);
+		log.info("총 댓글 개수 : " + result);
+	}
+	
+}

@@ -1,0 +1,47 @@
+package dto;
+
+import lombok.Data;
+
+@Data
+public class BoardListPaginDTO {
+
+    private int startPage;    // 화면에 보여질 시작 페이지 번호
+    private int endPage;      // 화면에 보여질 끝 페이지 번호
+    private boolean prev;     // 이전 버튼 활성화 여부
+    private boolean next;     // 다음 버튼 활성화 여부
+    
+    private int total;        // 전체 게시글 수
+    private Criteria cri;     // 현재 페이지 번호와 한 페이지당 개수를 담은 객체
+
+    // 생성자: 이 안에서 모든 계산을 끝냅니다.
+    public BoardListPaginDTO(Criteria cri, int total) {
+        this.cri = cri;
+        this.total = total;
+
+        // 1. 끝 페이지(endPage) 계산
+        // 현재 페이지가 3페이지라면: (int)(Math.ceil(3 / 10.0)) * 10 = 10
+        // 현재 페이지가 13페이지라면: (int)(Math.ceil(13 / 10.0)) * 10 = 20
+        this.endPage = (int) (Math.ceil(cri.getPageNum() / 10.0)) * 10;
+
+        // 2. 시작 페이지(startPage) 계산
+        this.startPage = this.endPage - 9;
+
+        // 3. 실제 마지막 페이지(realEnd) 계산
+        // 만약 전체 게시글이 123개라면, 실제 끝 페이지는 13페이지여야 함
+        int realEnd = (int) (Math.ceil((total * 1.0) / cri.getAmount()));
+
+        // 4. 끝 페이지 보정
+        // 위에서 계산한 endPage(10, 20..)가 실제 마지막 페이지(13)보다 크면 보정
+        if (realEnd < this.endPage) {
+            this.endPage = realEnd;
+        }
+
+        // 5. 이전 버튼(prev) 유무: 시작 페이지가 1보다 크면 무조건 존재
+        this.prev = this.startPage > 1;
+
+        // 6. 다음 버튼(next) 유무: 실제 마지막 페이지가 계산된 끝 페이지보다 크면 존재
+        this.next = this.endPage < realEnd;
+    }
+	
+}
+

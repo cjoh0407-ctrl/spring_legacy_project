@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.mysql.cj.Session;
 
 import dto.BoardDTO;
+import dto.BoardListPaginDTO;
 import dto.MemberDTO;
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
@@ -29,14 +30,28 @@ public class BoardController {
 	private final BoardService boardService;
 	
 	// 게시판 목록으로
-	@GetMapping("/list")
-	public String goList(Model model) {
-		
-		List<BoardDTO> getList = boardService.selectAll();
-		model.addAttribute("boardList", getList);
-		
-		return "board/list";
-	}
+    @GetMapping("/list")
+    public String goList(@RequestParam(value = "page", defaultValue = "1") int page,    // 기본 1page
+                        @RequestParam(value = "size", defaultValue = "10") int size,     // 기본 10개씩
+                        @RequestParam(value = "types", required = false) String types,
+                        @RequestParam(value = "keyword", required = false) String keyword,
+                        HttpSession session, // 세션을 파라미터로 추가
+                        Model model) {
+        
+        // 1. 세션에서 로그인 정보(member)를 꺼내 role 확인
+        MemberDTO member = (MemberDTO) session.getAttribute("member");
+        
+        // 2. 로그인 상태면 그 사람의 role을, 비로그인이면 기본 "USER" 권한 부여
+        String role = (member != null) ? member.getRole() : "USER";
+        
+        // 3. 서비스 호출 시 role 파라미터 추가 전달
+        BoardListPaginDTO pageList = boardService.getListPaging(page, size, types, keyword, role);
+        
+        model.addAttribute("pageList", pageList);
+        
+        return "board/list";
+    }
+	
 	
 	
 	// 새 글 작성 페이지로
@@ -67,55 +82,84 @@ public class BoardController {
 	}
 	
 	
+	// 2. 상세보기 (검색 파라미터 추가)
+    @GetMapping("/detail")
+    public String detail(@RequestParam("seq") int seq, 
+                        @RequestParam(value = "page", defaultValue = "1") int page,
+                        @RequestParam(value = "size", defaultValue = "10") int size,
+                        @RequestParam(value = "types", required = false) String types,
+                        @RequestParam(value = "keyword", required = false) String keyword,
+                        HttpSession session, Model model) {
+        
+        // --- 조회수 중복 방지 로식 ---
+        @SuppressWarnings("unchecked")
+        List<Integer> visitedList = (List<Integer>) session.getAttribute("visitedList");
+        if (visitedList == null) visitedList = new ArrayList<>();
+
+        if (!visitedList.contains(seq)) {
+            boardService.plusHit(seq);
+            visitedList.add(seq);
+            session.setAttribute("visitedList", visitedList);
+        }
+
+        BoardDTO dto = boardService.detailByOne(seq);
+        model.addAttribute("board", dto);
+        
+        // 상세 페이지에서 "목록으로" 돌아갈 때 사용할 정보 모델에 담기
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("types", types);
+        model.addAttribute("keyword", keyword);
+        
+        return "board/detail";
+    }
+
+
 	
+ // 3. 수정 페이지 이동 (검색 파라미터 유지)
+    @GetMapping("/modify")
+    public String modify(@RequestParam("seq") int seq, 
+                        @RequestParam(value = "page", defaultValue = "1") int page,
+                        @RequestParam(value = "types", required = false) String types,
+                        @RequestParam(value = "keyword", required = false) String keyword,
+                        Model model) {
+        
+        BoardDTO dto = boardService.detailByOne(seq);
+        model.addAttribute("board", dto);
+        
+        // 수정 취소 시 돌아갈 정보
+        model.addAttribute("page", page);
+        model.addAttribute("types", types);
+        model.addAttribute("keyword", keyword);
+        
+        return "board/modify";
+    }
 	
-	
-	//게시물 상세보기 페이지
-	@GetMapping("/detail")
-	public String detail(@RequestParam("seq") int seq, HttpSession session, Model model) {
+	// 삭제 로직 이후 원래 페이지로 리턴
+	@GetMapping("/delete")
+	public String delete(@RequestParam("seq") int seq,
+	                    @RequestParam(value = "page", defaultValue = "1") int page,
+	                    @RequestParam(value = "types", required = false) String types,
+	                    @RequestParam(value = "keyword", required = false) String keyword) {
 	    
-	    // 1. 세션에서 "이미 읽은 글 번호 리스트"를 꺼냅니다.
-		@SuppressWarnings("unchecked")
-	    List<Integer> visitedList = (List<Integer>) session.getAttribute("visitedList");
-
-	    // 2. 만약 리스트가 없다면(처음 글을 읽는 경우) 리스트를 새로 만듭니다.
-	    if (visitedList == null) {
-	        visitedList = new ArrayList<>();
-	    }
-
-	    // 3. 현재 글 번호(seq)가 리스트에 있는지 확인합니다.
-	    if (!visitedList.contains(seq)) {
-	        // 리스트에 번호가 없다면? -> 처음 읽는 글이므로 조회수 증가!
-	        boardService.plusHit(seq);
-	        
-	        // 그리고 리스트에 이 번호를 추가합니다.
-	        visitedList.add(seq);
-	        
-	        // 갱신된 리스트를 다시 세션에 담습니다.
-	        session.setAttribute("visitedList", visitedList);
-	    }
-
-	    // 4. 게시글 상세 정보 가져오기
-	    BoardDTO dto = boardService.detailByOne(seq);
-	    model.addAttribute("board", dto);
+	    boardService.delete(seq);
+	    return "redirect:/board/list?page=" + page + "&types=" + types + "&keyword=" + keyword;
+	}
+	
+	// 게시글 수정 로직 이후 원래 페이지와 검색 조건을 유지하며 리턴
+	@PostMapping("/update")
+	public String update(BoardDTO dto, 
+	                    @RequestParam(value = "page", defaultValue = "1") int page,
+	                    @RequestParam(value = "size", defaultValue = "10") int size,
+	                    @RequestParam(value = "types", required = false) String types,
+	                    @RequestParam(value = "keyword", required = false) String keyword) {
 	    
-	    return "board/detail";
+	    boardService.update(dto);
+	    
+	    // 수정 후 해당 게시글의 상세 페이지로 돌아가려면 seq가 반드시 필요합니다.
+	    return "redirect:/board/detail?seq=" + dto.getSeq() + 
+	            "&page=" + page + "&size=" + size + "&types=" + types + "&keyword=" + keyword;
 	}
-
-
-	
-	// 수정하기 페이지
-	@GetMapping("/modify")
-	public String modify(@RequestParam("seq") int seq, Model model) {
-		
-		BoardDTO dto = boardService.detailByOne(seq);
-		
-		model.addAttribute("board", dto);
-		
-		return "board/modify";
-	}
-	
-	
 	
 	
 }

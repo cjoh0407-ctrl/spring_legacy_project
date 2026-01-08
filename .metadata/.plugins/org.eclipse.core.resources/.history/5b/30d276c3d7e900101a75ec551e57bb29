@@ -1,0 +1,39 @@
+package controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import dto.MemberDTO;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@Controller
+@Log4j2
+@RequestMapping("/admin")
+@RequiredArgsConstructor
+public class AdminController {
+
+	@GetMapping("/main")
+	public String mainPage(HttpSession session) {
+		
+		MemberDTO checkUser = (MemberDTO) session.getAttribute("member");
+		
+		if(checkUser == null || !checkUser.getRole().equalsIgnoreCase("ADMIN")) {
+			return "redirect:/";
+		}
+		
+		return "admin/main";
+	}
+	
+	@GetMapping("board/list")
+	public String boardList() {
+		return "admin/board/list";
+	}
+	
+	@GetMapping("member/list")
+	public String memberList() {
+		return "admin/member/list";
+	}
+}

@@ -36,8 +36,11 @@
          • org.zerock.service : 비즈니스 로직 (BoardService, MemberService 등)
          • org.zerock.security : 보안 설정 (SecurityConfig 등)
          ═══════════════════════════════════════════════════════════ -->
-    <context:component-scan base-package="org.zerock.service" />
-    <context:component-scan base-package="org.zerock.security" />
+    <context:component-scan base-package="mapper" />
+    <context:component-scan base-package="service" />
+    <context:component-scan base-package="security" />
+    <context:component-scan base-package="controller" />
+	<context:annotation-config />
 
     <!-- ═══════════════════════════════════════════════════════════
          2️⃣ HikariCP DataSource 설정
@@ -129,8 +132,6 @@
          📦 스캔 대상: org.zerock.mapper 패키지의 모든 Mapper 인터페이스
          ═══════════════════════════════════════════════════════════ -->
     <mybatis-spring:scan base-package="mapper" />
-
-	<context:component-scan base-package="service" />
 	
     <!-- ═══════════════════════════════════════════════════════════
          6️⃣ AOP 자동 프록시 설정
@@ -142,5 +143,7 @@
          • 공통 기능(로깅, 트랜잭션 등)을 분리하여 관리
          ═══════════════════════════════════════════════════════════ -->
     <aop:aspectj-autoproxy />
+   
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
 </beans>

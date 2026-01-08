@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ═══════════════════════════════════════════════════════════════════
+     web.xml 파일 선언부
+     • Jakarta EE 6.0 웹 애플리케이션 스키마 사용
+     • Servlet 6.0 스펙 (Tomcat 10.x 이상 필요)
+     ═══════════════════════════════════════════════════════════════════ -->
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://jakarta.ee/xml/ns/jakartaee"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
+                        https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+    version="6.0">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         1️⃣ 애플리케이션 표시 이름
+         • Tomcat 관리 화면 등에서 표시되는 이름
+         ═══════════════════════════════════════════════════════════ -->
+    <display-name>springlegacy</display-name>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         2️⃣ 문자 인코딩 필터 (Character Encoding Filter)
+         
+         🎯 목적: 한글 깨짐 방지!
+         
+         • 모든 요청/응답을 UTF-8로 처리
+         • forceEncoding=true : 강제로 모든 인코딩을 UTF-8로 변환
+         • 가장 먼저 실행되어야 하므로 맨 위에 선언
+         ═══════════════════════════════════════════════════════════ -->
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>
+            org.springframework.web.filter.CharacterEncodingFilter
+        </filter-class>
+        <!-- encoding : 사용할 문자 인코딩 -->
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+        <!-- forceEncoding : 이미 인코딩이 설정되어 있어도 강제로 적용 -->
+        <init-param>
+            <param-name>forceEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <!-- 인코딩 필터를 모든 URL에 적용 -->
+    <filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>  <!-- /* : 모든 요청에 적용 -->
+    </filter-mapping>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         3️⃣ Spring Security 필터 (보안 필터)
+         
+         🎯 목적: 로그인/로그아웃, 권한 체크, 보안 처리
+         
+         • DelegatingFilterProxy : Spring Bean으로 등록된 필터를 호출
+         • "springSecurityFilterChain" : Spring Security가 자동 생성한 필터 체인
+         • 모든 요청에 대해 보안 검사 수행
+         ═══════════════════════════════════════════════════════════ -->
+     <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>
+            org.springframework.web.filter.DelegatingFilterProxy
+        </filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>  <!-- 모든 URL에 보안 필터 적용 -->
+    </filter-mapping>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         4️⃣ Root Application Context 설정 (리스너)
+         
+         🎯 목적: 애플리케이션 전체에서 공유할 Bean 설정 로드
+         
+         • ContextLoaderListener : 서버 시작 시 root-context.xml 로드
+         • root-context.xml : DB, Service, Security 등 설정 포함
+         • 여기서 생성된 Bean은 모든 서블릿에서 공유됨
+         ═══════════════════════════════════════════════════════════ -->
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+
+    <!-- root-context.xml 파일 위치 지정 -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/spring/root-context.xml
+            security.SecurityConfig
+            security.PasswordEncoderConfig
+        </param-value>
+    </context-param>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         5️⃣ DispatcherServlet 설정 (핵심!)
+         
+         🎯 목적: 모든 HTTP 요청을 받아서 적절한 Controller에 전달
+         
+         📌 Spring MVC의 핵심!
+         • 프론트 컨트롤러 패턴 (Front Controller Pattern)
+         • 요청 URL을 분석하여 알맞은 Controller 메서드 호출
+         • servlet-context.xml에서 웹 관련 설정 로드
+         ═══════════════════════════════════════════════════════════ -->
+    <servlet>
+        <servlet-name>appServlet</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+
+        <!-- DispatcherServlet이 사용할 설정 파일 -->
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring/servlet-context.xml</param-value>
+        </init-param>
+
+        <!-- load-on-startup : 서버 시작 시 바로 로드 (1 = 최우선) -->
+        <load-on-startup>1</load-on-startup>
+
+        <!-- ═══════════════════════════════════════════════════════
+             📎 파일 업로드 설정 (Multipart Config)
+             
+             • max-file-size : 단일 파일 최대 크기 (20MB)
+             • max-request-size : 전체 요청 최대 크기 (40MB)
+             • file-size-threshold : 메모리 임계값 (이 크기 초과 시 디스크 사용)
+             ═══════════════════════════════════════════════════════ -->
+        <multipart-config>
+            <max-file-size>20971520</max-file-size>         <!-- 20MB -->
+            <max-request-size>41943040</max-request-size>   <!-- 40MB -->
+            <file-size-threshold>20971520</file-size-threshold>
+        </multipart-config>
+    </servlet>
+
+    <!-- DispatcherServlet이 처리할 URL 패턴 -->
+    <servlet-mapping>
+        <servlet-name>appServlet</servlet-name>
+        <url-pattern>/</url-pattern>  <!-- / : 모든 요청을 처리 -->
+    </servlet-mapping>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         6️⃣ Welcome File (시작 페이지)
+         
+         🎯 목적: http://localhost:8080/ 접속 시 보여줄 페이지
+         
+         • 순서대로 찾아서 첫 번째로 존재하는 파일 표시
+         ═══════════════════════════════════════════════════════════ -->
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+</web-app>

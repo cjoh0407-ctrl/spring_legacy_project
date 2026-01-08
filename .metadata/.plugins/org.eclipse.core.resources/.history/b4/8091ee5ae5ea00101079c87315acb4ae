@@ -1,0 +1,28 @@
+package service;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import dto.ReplyDTO;
+import dto.ReplyListPaginDTO;
+
+public interface ReplyService {
+
+    int insert(ReplyDTO replyDTO);	// 댓글 등록
+    
+    ReplyDTO read(@Param("rno") int rno); // 1개 댓글 조회, 읽기
+
+    int delete(@Param("rno") int rno);	// 댓글 삭제
+    
+    int update(ReplyDTO replyDTO);	// 댓글 수정
+   
+    ReplyListPaginDTO listOfBoard(	// 게시글의 댓글 목록(페이징처리까지)
+            @Param("bno") int bno,	// 어떤 게시물인지 확인.
+            @Param("skip") int skip,	// 건너 뛸 데이터 개수
+            @Param("limit") int limit	// 한 페이지에 보여줄 댓글 개수
+    );
+
+    int countOfBoard(int bno);	// 게시물에 달린 댓글 개수
+	
+}

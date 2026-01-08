@@ -1,0 +1,195 @@
+package mapper;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.BoardDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class BoardMapperTest {
+
+	@Autowired
+	private BoardMapper boardMapper;
+	
+	@Test
+	void testSelectAll() {
+		//given
+		
+		
+		//when
+		List<BoardDTO> list = boardMapper.selectAll();	
+		
+		//then
+		assertNotNull(list);
+		list.forEach(m -> log.info(m));
+		
+	}
+	
+	@Test	// 페이징 처리
+	void testGetListPaging() {
+		//given
+		int page = 1;
+		int size = 10;
+		int skip = (page - 1) * size;
+		
+		//when
+		List<BoardDTO> list = boardMapper.getListPaging(skip, size);
+		
+		//then
+		list.forEach(m -> log.info("게시글 : " + m));
+		
+	}
+
+	@Test
+	void testGetCount() {
+		int total = boardMapper.getPagingCount();
+		
+		log.info("전체 게시글 개수 : " + total);
+	}
+	
+	
+	@Test
+	void testModify() {
+		//given
+		int seq = 2;
+				
+		//when
+		BoardDTO modify = boardMapper.detailByOne(seq);
+		
+		//then
+		assertNotNull(modify);
+		log.info(modify);
+	}
+
+	@Test
+	void testInsert() {
+		//given
+		BoardDTO dto = BoardDTO.builder()
+						.writer("user01")	// member테이블 id와 참조무결성 제약이라서 id에 있는 값만 사용해야함.
+						.title("test")
+						.content("test")
+						.build();
+		
+		//when
+		boardMapper.insert(dto);
+		
+		//then
+		assertNotNull(dto);
+		testSelectAll();
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		int seq = 2;
+		
+		
+		//when
+		boardMapper.delete(seq);
+		
+		//then
+		
+		
+	}
+
+	@Test
+	void testUpdate() {
+		//given
+		int seq = 2;
+		
+		BoardDTO dto = BoardDTO.builder()
+				.seq(seq)
+				.title("testupdate1")
+				.content("testupdate1")
+				.build();
+		//when
+		boardMapper.update(dto);;
+		
+		//then
+		assertNotNull(dto);
+		
+		testSelectAll();
+		
+
+	}
+	
+	@Test
+	void testHitPlus() {
+		//given
+		int seq = 3;
+		
+		//when
+		boardMapper.plusHit(seq);
+		
+		//then
+	}
+
+	@Test
+	void testGetTotalCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardMapper.getTotalCount();
+		
+		//then
+		log.info("총 게시물 수 : " + totalCount);
+		
+	}
+	
+	@Test
+	void testGetTodayCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardMapper.getTodayCount();
+				
+		//then
+		log.info("오늘 게시물 수 : " + totalCount);		
+	}
+	
+	@Test
+    public void testListSearch() {
+		//given
+        String types = "w";
+        String keyword = "user01"; 
+
+        //when
+        List<BoardDTO> list = boardMapper.listSearch(0, 10, types, keyword);
+        
+        //then
+        log.info("검색 결과 개수: " + list.size());
+        list.forEach(board -> log.info(board));
+    }
+	
+	@Test
+	public void testListCountSearch() {
+	    // 1. 테스트 조건 설정 (위의 테스트와 동일하게 설정)
+	    String types = "w";
+	    String keyword = "user01";
+
+	    // 2. 매퍼 호출
+	    int totalCount = boardMapper.listCountSearch(types, keyword);
+	    
+	    // 3. 결과 확인
+	    log.info("======= 2. listCountSearch 테스트 =======");
+	    log.info("검색된 총 게시글 수: " + totalCount);
+	    
+	    // 검증: 개수가 0보다 크거나 같은지 확인
+	    if(totalCount >= 0) {
+	        log.info("카운트 쿼리 정상 작동 중");
+	    }
+	}
+	
+}

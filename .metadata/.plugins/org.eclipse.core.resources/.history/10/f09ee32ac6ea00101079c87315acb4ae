@@ -1,0 +1,75 @@
+package service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import dto.MemberDTO;
+import lombok.RequiredArgsConstructor;
+import mapper.MemberMapper;
+
+@Service
+@RequiredArgsConstructor
+public class MemberServiceImpl implements MemberService{
+	
+	private final MemberMapper memberMapper;
+
+	@Override
+	public List<MemberDTO> selectAll() {
+		return memberMapper.selectAll();
+	}
+
+	@Override
+	public MemberDTO selectById(String id) {
+		return memberMapper.selectById(id);
+	}
+
+	@Override
+	public void insert(MemberDTO dto) {
+		memberMapper.insert(dto);
+	}
+	
+	@Override
+	public void update(MemberDTO dto) {
+		memberMapper.update(dto);
+	}
+	
+	@Override
+	public void delete(String id) {
+		memberMapper.delete(id);	
+	}
+
+	@Override
+	public int getTotalMemberCount() {
+		return memberMapper.getTotalMemberCount();
+	}
+
+	@Override
+	public List<MemberDTO> getRecentMembers() {
+		return memberMapper.getRecentMembers();
+	}
+
+	@Override
+	public MemberDTO login(String id, String password) {
+		return memberMapper.login(id, password);
+	}
+
+	@Override
+	public void updateEnabled(String id, boolean enabled) {
+		memberMapper.updateEnabled(id, enabled);
+	}
+
+	@Override
+	public List<MemberDTO> getListPaging(int skip, int size) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getPagingCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+}

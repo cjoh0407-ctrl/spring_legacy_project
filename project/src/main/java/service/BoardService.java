@@ -2,7 +2,10 @@ package service;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import dto.BoardDTO;
+import dto.BoardListPaginDTO;
 
 public interface BoardService {
 	
@@ -18,8 +21,40 @@ List<BoardDTO> selectAll();	// 전체 조회
 	void delete(int seq); 		// delete 삭제
 	
 	
+	void restore(int seq);		// 관리자 게시물 복원
+	
+	
 	void update(BoardDTO dto);		// update 수정
 
 
 	void plusHit(int seq);	// 조회수 +1
+	
+	
+	int getTotalCount(); // 총 게시물 수
+	
+	
+	int getTodayCount(); // 오늘 게시물 수
+	
+	
+	BoardListPaginDTO getListPaging(int page, int size, String types, String keyword, String role); //페이징 처리 리스트 가져오기.
+	
+	
+	int getPagingCount(); // 페이징 처리를 위한 게시물 개수 카운트
+	
+	
+    // 검색 조건이 포함된 리스트 조회
+    List<BoardDTO> listSearch(
+        @Param("skip") int skip, 
+        @Param("size") int size, 
+        @Param("types") String types, 
+        @Param("keyword") String keyword,
+        @Param("role") String role
+    );
+
+    // 검색 조건에 맞는 전체 글 개수 (페이징 계산용)
+    int listCountSearch(
+        @Param("types") String types, 
+        @Param("keyword") String keyword,
+        @Param("role") String role
+    );
 }

@@ -1,7 +1,0 @@
-package mapper;
-
-import junit.framework.TestCase;
-
-public class MemberMapperTest extends TestCase {
-
-}

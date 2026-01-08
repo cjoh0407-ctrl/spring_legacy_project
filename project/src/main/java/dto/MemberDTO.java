@@ -1,6 +1,9 @@
 package dto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +35,16 @@ public class MemberDTO {
 	private String email;
 	private String role;
 	private String phone;
+	
+	@JsonIgnore
 	private LocalDateTime regdate;
+	
 	private boolean enabled;
+	
+	// 가입일 날짜만 나오게
+	public String getRegdateShort() {
+	    if(this.regdate == null) return "";
+	    return this.regdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+	}
 	
 }

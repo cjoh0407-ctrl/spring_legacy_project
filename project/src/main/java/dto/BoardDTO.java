@@ -3,6 +3,8 @@ package dto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,8 +38,13 @@ public class BoardDTO {
 	private String title;
 	private String content;
 	private int hit;
+	
+	@JsonIgnore
 	private LocalDateTime regdate;
+
+	@JsonIgnore
 	private LocalDateTime updateDate;
+	
 	private boolean delflag;
 	
 	// 게시글 작성일 날짜만 나오게.
@@ -45,4 +52,6 @@ public class BoardDTO {
 	    if(this.regdate == null) return "";
 	    return this.regdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 	}
+	
+	
 }

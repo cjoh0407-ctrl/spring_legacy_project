@@ -1,0 +1,188 @@
+package service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.BoardListPaginDTO;
+import dto.MemberDTO;
+import dto.MemberListPaginDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class MemberServiceTest {
+
+	@Autowired
+	private MemberService memberService;
+	
+	@Test
+	void testSelectAll() {
+		//given
+		
+		//when 
+		List<MemberDTO> selectAll = memberService.selectAll();
+		
+		//then
+		assertNotNull(selectAll);
+		selectAll.forEach(m -> log.info(m));
+	}
+
+	@Test
+	void testGetListPaging() {
+		//given
+		int page = 1;      // 보고 싶은 페이지
+        int size = 10;     // 한 페이지당 개수
+        String types = null;  
+        String keyword = null; 
+		
+		//when
+        MemberListPaginDTO result = memberService.getListPaging(page, size, types, keyword);
+		
+		//then
+        log.info("현재 페이지 번호: " + result.getPage());
+        log.info("한 페이지당 개수: " + result.getSize());
+        log.info("전체 게시글 수: " + result.getTotalCount());
+        log.info("시작 페이지(start): " + result.getStart());
+        log.info("끝 페이지(end): " + result.getEnd());
+        log.info("이전 버튼 유무: " + result.isPrev());
+        log.info("다음 버튼 유무: " + result.isNext());
+        
+        
+        log.info("페이지 번호들: " + result.getPageNums());
+	}
+
+	
+	@Test
+	void testSelectById() {
+		//given
+		String id = "test";
+		
+		//when
+		MemberDTO dto = memberService.selectById(id);
+		
+		//then
+		log.info(dto);
+	}
+
+	@Test
+	void testInsert() {
+		//given
+		MemberDTO dto = MemberDTO.builder()
+				.id("test2")
+				.name("test2")
+				.password("1234")
+				.email("test2@test.com")
+				.phone("010-1111-1111")
+				.role("admin")
+				.build();
+		
+		//when
+		memberService.insert(dto);
+		List<MemberDTO> selectAll = memberService.selectAll();
+		
+		//then
+		assertNotNull(selectAll);
+		selectAll.forEach(m -> log.info(m));
+	}
+
+	@Test
+	void testUpdate() {
+		//given
+		String id = "test";
+		
+		MemberDTO dto = MemberDTO.builder()
+				.name("test")
+				.password("1234")
+				.email("testupdate3@test.com")
+				.phone("010-1111-1111")
+				.role("admin")
+				.id(id)
+				.build();
+		
+		//when
+		memberService.update(dto);
+		
+		//then
+		MemberDTO result = memberService.selectById(id);
+		
+		log.info(result);
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		String id = "test";
+		
+		//when
+		memberService.delete(id);
+		
+		//then
+		List<MemberDTO> selectAll = memberService.selectAll();
+		
+		//then
+		assertNotNull(selectAll);
+		selectAll.forEach(m -> log.info(m));
+	}
+	
+	@Test
+	void getTotalMemberCountTest() {
+		//given
+		
+		
+		//when
+		int totalMemberCount = memberService.getTotalMemberCount();
+		
+		//then
+		log.info("총 회원 수 : " + totalMemberCount);
+	}
+	
+	
+	@Test
+	void getRecentMembersTest() {
+		//given
+		
+		
+		//when
+		List<MemberDTO> recentMembers = memberService.getRecentMembers();
+		
+		//then
+		assertNotNull(recentMembers);
+		recentMembers.forEach(m -> log.info(m));
+	}
+	
+	@Test
+	void loginTest() {
+		//given
+		
+		//when
+		MemberDTO login = memberService.login("test", "1234");
+		
+		//then
+		assertNull(login);
+		log.info("탈퇴 회원 로그인 결과 값 : " + login);
+		
+	}
+	
+	@Test
+	void updateEnabledTest() {
+		//given
+		
+		
+		//when
+		memberService.updateEnabled("test", false);
+		
+		//then
+		MemberDTO selectById = memberService.selectById("test");
+		
+		log.info(selectById);
+	}
+
+}

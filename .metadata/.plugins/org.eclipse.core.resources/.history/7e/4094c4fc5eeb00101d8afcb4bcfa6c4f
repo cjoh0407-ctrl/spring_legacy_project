@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ReplyMapper">
+
+<insert id="insert" parameterType="dto.ReplyDTO">
+	insert into reply (bno, replyText, replyer)
+	values (#{bno}, #{replyText}, #{replyer});
+</insert>
+
+<select id="read" resultType="dto.ReplyDTO">
+	select * from reply
+	where rno = #{rno};
+</select>
+
+<delete id="delete" parameterType="int">
+	update reply set delflag=true
+	where rno=#{rno};
+</delete>
+
+<update id="update" parameterType="dto.ReplyDTO">
+	update reply set replyText=#{replyText}
+	where rno=#{rno};
+</update>
+
+<select id="listOfBoard" resultType="dto.ReplyDTO">
+	select * from reply
+	where bno = #{bno}
+	order by rno desc
+	limit #{limit} offset #{skip};
+</select>
+
+<select id="countOfBoard" resultType="int">
+	select count(rno) from reply
+	where bno = #{bno}
+</select>
+
+</mapper>

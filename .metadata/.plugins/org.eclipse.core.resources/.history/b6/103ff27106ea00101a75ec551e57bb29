@@ -1,0 +1,46 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 시스템 로그인</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; }
+        h1 { color: #333; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .btn { display: block; padding: 12px; text-decoration: none; border-radius: 5px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
+        .btn-login { background-color: #4e73df; color: white; }
+        .btn-register { background-color: white; border: 1px solid #4e73df; color: #4e73df; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>게시판 시스템</h1>
+        
+        <form action="${pageContext.request.contextPath}/member/login" method="post">
+            <input type="text" name="id" placeholder="아이디" required>
+            <input type="password" name="password" placeholder="비밀번호" required>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn btn-login">로그인</button>
+                <a href="${pageContext.request.contextPath}/member/join" class="btn btn-register">
+                    회원가입
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    // 컨트롤러에서 rttr.addFlashAttribute로 보낸 "msg"가 있다면 알림창을 띄움
+    var msg = "${msg}";
+    var error = "${error}";
+    if(msg) alert(msg);
+    if(error) alert(error);
+	</script>
+
+</body>
+</html>
+

@@ -1,0 +1,96 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 시스템 로그인</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; }
+        h1 { color: #333; margin-bottom: 25px; }
+        
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        
+        /* 추가: 에러 메시지 스타일 */
+        .error-msg {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: left;
+            padding-left: 5px;
+            display: block;
+        }
+
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        
+        .btn { 
+            display: block; 
+            padding: 12px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            text-align: center; 
+            transition: 0.2s;
+        }
+        
+        .btn-login { background-color: #4e73df; color: white; border: none; }
+        .btn-login:hover { background-color: #2e59d9; }
+        
+        .btn-register { 
+            background-color: white; 
+            border: 1px solid #4e73df; 
+            color: #4e73df; 
+        }
+        .btn-register:hover { background-color: #f8f9fc; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>게시판 시스템</h1>
+        
+        <form action="${pageContext.request.contextPath}/member/login" method="post">
+            <input type="text" name="id" placeholder="아이디" required>
+            <input type="password" name="password" placeholder="비밀번호" required>
+            
+            <%-- 추가: 컨트롤러에서 보낸 error가 있을 때만 출력 --%>
+            <c:if test="${not empty error}">
+                <span class="error-msg">${error}</span>
+            </c:if>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-login">로그인</button>
+                <a href="${pageContext.request.contextPath}/member/join" class="btn btn-register">
+                    회원가입
+                </a>
+            </div>
+        </form>
+    </div>
+    
+<script>
+    // 1. 에러 메시지 처리
+    <c:if test="${not empty error}">
+        var errorVal = `<c:out value="${error}"/>`; // 백틱(`)을 사용해 문자열 깨짐 방지
+        console.log("전달된 에러 메시지:", errorVal);
+        if(errorVal) {
+            alert(errorVal);
+        }
+    </c:if>
+
+    // 2. 일반 메시지 처리 (성공 알림 등)
+    <c:if test="${not empty msg}">
+        var msgVal = `<c:out value="${msg}"/>`;
+        console.log("전달된 일반 메시지:", msgVal);
+        if(msgVal) {
+            alert(msgVal);
+        }
+    </c:if>
+</script>
+
+</body>
+</html>

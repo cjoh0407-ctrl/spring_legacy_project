@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import dto.BoardListPaginDTO;
 import dto.MemberDTO;
+import dto.MemberListPaginDTO;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -33,6 +35,30 @@ class MemberServiceTest {
 		selectAll.forEach(m -> log.info(m));
 	}
 
+	@Test
+	void testGetListPaging() {
+		//given
+		int page = 1;      // 보고 싶은 페이지
+        int size = 10;     // 한 페이지당 개수
+        String types = null;  
+        String keyword = null; 
+		
+		//when
+        MemberListPaginDTO result = memberService.getListPaging(page, size, types, keyword);
+		
+		//then
+        log.info("현재 페이지 번호: " + result.getPage());
+        log.info("한 페이지당 개수: " + result.getSize());
+        log.info("전체 게시글 수: " + result.getTotalCount());
+        log.info("시작 페이지(start): " + result.getStart());
+        log.info("끝 페이지(end): " + result.getEnd());
+        log.info("이전 버튼 유무: " + result.isPrev());
+        log.info("다음 버튼 유무: " + result.isNext());
+        
+        log.info("페이지 번호들: " + result.getPageNums());
+	}
+
+	
 	@Test
 	void testSelectById() {
 		//given
@@ -104,5 +130,86 @@ class MemberServiceTest {
 		assertNotNull(selectAll);
 		selectAll.forEach(m -> log.info(m));
 	}
+	
+	@Test
+	void getTotalMemberCountTest() {
+		//given
+		
+		
+		//when
+		int totalMemberCount = memberService.getTotalMemberCount();
+		
+		//then
+		log.info("총 회원 수 : " + totalMemberCount);
+	}
+	
+	
+	@Test
+	void getRecentMembersTest() {
+		//given
+		
+		
+		//when
+		List<MemberDTO> recentMembers = memberService.getRecentMembers();
+		
+		//then
+		assertNotNull(recentMembers);
+		recentMembers.forEach(m -> log.info(m));
+	}
+	
+	@Test
+	void loginTest() {
+		//given
+		
+		//when
+		MemberDTO login = memberService.login("test", "1234");
+		
+		//then
+		assertNull(login);
+		log.info("탈퇴 회원 로그인 결과 값 : " + login);
+		
+	}
+	
+	@Test
+	void updateEnabledTest() {
+		//given
+		
+		
+		//when
+		memberService.updateEnabled("test", false);
+		
+		//then
+		MemberDTO selectById = memberService.selectById("test");
+		
+		log.info(selectById);
+	}
+	
+	
+	// 1. 회원 목록 검색 서비스 테스트
+    @Test
+    public void testMemberListSearchService() {
+        log.info("======= MemberService: listSearch 테스트 =======");
+        
+        // 1페이지(0부터), 10개, 아이디(i) 검색, 키워드 'user'
+        List<MemberDTO> list = memberService.memberListSearch(0, 10, "i", "user");
+        
+        if(list.isEmpty()) {
+            log.info("조회된 결과가 없습니다.");
+        } else {
+            list.forEach(member -> {
+                log.info("ID: " + member.getId() + " | 이름: " + member.getName() + " | 이메일: " + member.getEmail());
+            });
+        }
+    }
+
+    // 2. 회원 전체 개수 서비스 테스트
+    @Test
+    public void testMemberCountSearchService() {
+        log.info("======= MemberService: countSearch 테스트 =======");
+        
+        int total = memberService.memberCountSearch("i", "user");
+        
+        log.info("검색된 총 회원 수: " + total);
+    }
 
 }

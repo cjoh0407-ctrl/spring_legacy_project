@@ -1,0 +1,24 @@
+package dto;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ReplyListPaginDTO {
+
+    // 1. 실제 댓글 데이터 리스트
+    private List<ReplyDTO> replyList;
+
+    // 2. 전체 댓글 개수 (페이징 버튼 계산용)
+    private int replyCount;
+    
+    // (선택사항) 현재 페이지 번호를 같이 담기도 합니다.
+    private int page;
+}

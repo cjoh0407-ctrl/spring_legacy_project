@@ -1,0 +1,53 @@
+package com.project.security;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+    private final CustomUserDetailsService customUserDetailsService;
+    private final AuthenticationSuccessHandler successHandler; // CustomLoginSuccessHandler
+    private final AccessDeniedHandler accessDeniedHandler; // Custom403Handler
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        
+        // CSRF 일단 비활성화 (나중에 켜는 법 알려드릴게요)
+        http.csrf(csrf -> csrf.disable());
+
+        http.authorizeHttpRequests(auth -> auth
+            .requestMatchers("/admin/**").hasRole("ADMIN") // 관리자 페이지 권한
+            .requestMatchers("/resources/**", "/member/login").permitAll() // 공용 리소스
+            .anyRequest().authenticated() // 나머지는 로그인 필수
+        );
+
+        http.formLogin(form -> form
+            .loginPage("/member/login")
+            .loginProcessingUrl("/member/login")
+            .usernameParameter("id") // JSP의 input name="id"
+            .passwordParameter("pw") // JSP의 input name="pw"
+            .successHandler(successHandler) // 로그인 성공 시 처리 로직
+            .permitAll()
+        );
+
+        http.exceptionHandling(ex -> ex
+            .accessDeniedHandler(accessDeniedHandler) // 권한 없을 때(403) 처리
+        );
+
+        http.logout(logout -> logout
+            .logoutUrl("/member/logout")
+            .logoutSuccessUrl("/")
+        );
+
+        return http.build();
+    }
+}

@@ -4,10 +4,22 @@
 	<section name="java.lang.Class">
 		<item key="replaceBarOpen" value="false"/>
 		<list key="findhistory">
+			<item value="secu"/>
+			<item value="나"/>
+			<item value="member"/>
 			<item value="board"/>
+			<item value="Hit"/>
+			<item value="hit"/>
+			<item value="if"/>
+			<item value="jack"/>
+			<item value="bno"/>
 			<item value="configl"/>
 			<item value="org.ze"/>
 			<item value="mapper"/>
 		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="724"/>
+		<item key="DIALOG_Y_ORIGIN" value="392"/>
 	</section>
 </section>

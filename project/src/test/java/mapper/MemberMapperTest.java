@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import dto.BoardDTO;
 import dto.MemberDTO;
 import lombok.extern.log4j.Log4j2;
 
@@ -32,6 +33,21 @@ class MemberMapperTest {
 		assertNotNull(list);
 		list.forEach(m -> log.info(m));
 	
+	}
+	
+	@Test	// 페이징 처리
+	void testGetListPaging() {
+		//given
+		int page = 1;
+		int size = 10;
+		int skip = (page - 1) * size;
+		
+		//when
+		List<MemberDTO> list = memberMapper.getListPaging(skip, size);
+		
+		//then
+		list.forEach(m -> log.info("게시글 : " + m));
+		
 	}
 	
 	@Test
@@ -107,6 +123,105 @@ class MemberMapperTest {
 		//then
 		selectAllTest();
 		
+	}
+	
+	
+	@Test
+	void getTotalMemberCountTest() {
+		//given
+		
+		
+		//when
+		int totalMemberCount = memberMapper.getTotalMemberCount();
+		
+		//then
+		log.info("총 회원 수 : " + totalMemberCount);
+	}
+	
+	
+	@Test
+	void getRecentMembersTest() {
+		//given
+		
+		
+		//when
+		List<MemberDTO> recentMembers = memberMapper.getRecentMembers();
+		
+		//then
+		assertNotNull(recentMembers);
+		recentMembers.forEach(m -> log.info(m));	
+	}
+	
+	
+	@Test
+	void loginTest() {
+		//given
+		
+		//when
+		MemberDTO login = memberMapper.login("test", "1234");
+		
+		//then
+		assertNull(login);
+		log.info("탈퇴 회원 로그인 결과 값 : " + login);
+		
+	}
+	
+	
+	@Test
+	void updateEnabledTest() {
+		//given
+		
+		
+		//when
+		memberMapper.updateEnabled("test", true);
+		
+		//then
+		MemberDTO selectById = memberMapper.selectById("test");
+		
+		log.info(selectById);
+	}
+	
+	@Test
+	public void testMemberListSearch() {
+	    // 1. 테스트 조건 (아이디 'i' 검색, 키워드 'user')
+	    String types = "i";
+	    String keyword = "user"; // 실제 DB에 있는 아이디 일부를 넣어보세요
+
+	    // 2. 매퍼 호출 (0번부터 10개)
+	    List<MemberDTO> list = memberMapper.memberListSearch(0, 10, types, keyword);
+
+	    // 3. 결과 확인
+	    log.info("======= 1. memberListSearch 테스트 =======");
+	    if(list.isEmpty()) {
+	        log.info("검색된 회원이 없습니다.");
+	    } else {
+	        list.forEach(member -> {
+	            log.info("아이디: " + member.getId());
+	            log.info("이름: " + member.getName());
+	            log.info("이메일: " + member.getEmail());
+	            log.info("가입일: " + member.getRegdate());
+	            log.info("---------------------------");
+	        });
+	    }
+	}
+	
+	@Test
+	public void testMemberCountSearch() {
+	    // 1. 테스트 조건 (이름 'n' 검색, 키워드 '홍길동')
+	    String types = "n";
+	    String keyword = "홍길동";
+
+	    // 2. 매퍼 호출
+	    int totalCount = memberMapper.memberCountSearch(types, keyword);
+
+	    // 3. 결과 확인
+	    log.info("======= memberCountSearch 테스트 =======");
+	    log.info("검색된 총 회원 수: " + totalCount);
+	    
+	    // 검증: 검색 결과가 1개 이상이어야 함 (실제 데이터 기준)
+	    if(totalCount > 0) {
+	        log.info("회원 카운트 쿼리 정상 작동");
+	    }
 	}
 
 }

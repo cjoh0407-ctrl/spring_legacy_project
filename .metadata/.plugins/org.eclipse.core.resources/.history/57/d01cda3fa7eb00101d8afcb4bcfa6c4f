@@ -1,0 +1,93 @@
+package service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import dto.BoardDTO;
+import dto.BoardListPaginDTO;
+import dto.MemberDTO;
+import dto.MemberListPaginDTO;
+import lombok.RequiredArgsConstructor;
+import mapper.MemberMapper;
+
+@Service
+@RequiredArgsConstructor
+public class MemberServiceImpl implements MemberService{
+	
+	private final MemberMapper memberMapper;
+
+	@Override
+	public List<MemberDTO> selectAll() {
+		return memberMapper.selectAll();
+	}
+
+	@Override
+	public MemberDTO selectById(String id) {
+		return memberMapper.selectById(id);
+	}
+
+	@Override
+	public void insert(MemberDTO dto) {
+		memberMapper.insert(dto);
+	}
+	
+	@Override
+	public void update(MemberDTO dto) {
+		memberMapper.update(dto);
+	}
+	
+	@Override
+	public void delete(String id) {
+		memberMapper.delete(id);	
+	}
+
+	@Override
+	public int getTotalMemberCount() {
+		return memberMapper.getTotalMemberCount();
+	}
+
+	@Override
+	public List<MemberDTO> getRecentMembers() {
+		return memberMapper.getRecentMembers();
+	}
+
+	@Override
+	public MemberDTO login(String id, String password) {
+		return memberMapper.login(id, password);
+	}
+
+	@Override
+	public void updateEnabled(String id, boolean enabled) {
+		memberMapper.updateEnabled(id, enabled);
+	}
+
+	@Override
+	public MemberListPaginDTO getListPaging(int page, int size, String types, String keyword) {
+
+		int skip = (page - 1) * size;
+		
+		List<MemberDTO> listPaging = memberMapper.getListPaging(skip, size);
+		
+		int totalCount = memberMapper.getPagingCount();
+		
+		return new MemberListPaginDTO(listPaging, totalCount, page, size, types, keyword);
+	}
+
+	@Override
+	public int getPagingCount() {
+		return memberMapper.getPagingCount();
+	}
+
+	@Override
+	public List<MemberDTO> memberListSearch(int skip, int size, String types, String keyword) {
+		return memberMapper.memberListSearch(skip, size, types, keyword);
+	}
+
+	@Override
+	public int memberCountSearch(String types, String keyword) {
+		return memberMapper.memberCountSearch(types, keyword);
+	}
+
+
+}

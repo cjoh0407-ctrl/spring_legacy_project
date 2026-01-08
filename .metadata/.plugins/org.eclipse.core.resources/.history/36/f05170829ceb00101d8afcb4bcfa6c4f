@@ -1,0 +1,190 @@
+package service;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import dto.BoardDTO;
+import dto.BoardListPaginDTO;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration("file:src/main/webapp/WEB-INF/spring/root-context.xml")
+class BoardServiceTest {
+
+	@Autowired
+	private BoardService boardService;
+	
+	@Test
+	void testSelectAll() {
+		//given
+		
+		//when
+		List<BoardDTO> list = boardService.selectAll();	
+		
+		//then
+		assertNotNull(list);
+		list.forEach(m -> log.info(m));
+	}
+	
+	@Test
+	void testGetListPaging() {
+		//given
+		int page = 1;      // 보고 싶은 페이지
+        int size = 10;     // 한 페이지당 개수
+        String types = null;  
+        String keyword = null; 
+        String role = "USER";
+		
+		//when
+        BoardListPaginDTO result = boardService.getListPaging(page, size, types, keyword, role);
+		
+		//then
+        log.info("현재 페이지 번호: " + result.getPage());
+        log.info("한 페이지당 개수: " + result.getSize());
+        log.info("전체 게시글 수: " + result.getTotalCount());
+        log.info("시작 페이지(start): " + result.getStart());
+        log.info("끝 페이지(end): " + result.getEnd());
+        log.info("이전 버튼 유무: " + result.isPrev());
+        log.info("다음 버튼 유무: " + result.isNext());
+        
+        // result.getBoardDTOList().forEach(dto -> log.info(dto));
+        
+        log.info("페이지 번호들: " + result.getPageNums());
+	}
+
+	@Test
+	void testModify() {
+		//given
+		int seq = 2;
+				
+		//when
+		BoardDTO modify = boardService.detailByOne(seq);
+		
+		//then
+		assertNotNull(modify);
+		log.info(modify);
+	}
+
+	@Test
+	void testInsert() {
+		//given
+		BoardDTO dto = BoardDTO.builder()
+						.writer("user01")	// member테이블 id와 참조무결성 제약이라서 id에 있는 값만 사용해야함.
+						.title("testservice")
+						.content("testservice")
+						.build();
+		
+		//when
+		boardService.insert(dto);
+		
+		//then
+		assertNotNull(dto);
+		testSelectAll();
+	}
+
+	@Test
+	void testDelete() {
+		//given
+		int seq = 4;
+		
+		//when
+		boardService.delete(seq);
+		
+		//then
+	}
+	
+	@Test
+	void testRestore() {
+		//given
+		int seq = 402;
+		//when
+		boardMapper.restore(seq);
+		
+		//then
+	}
+
+
+	@Test
+	void testUpdate() {
+		//given
+		int seq = 4;
+		
+		BoardDTO dto = BoardDTO.builder()
+				.seq(seq)
+				.title("test_service_update_1")
+				.content("test_service_update_1")
+				.build();
+		//when
+		boardService.update(dto);;
+		
+		//then
+		assertNotNull(dto);
+		
+		testSelectAll();
+	}
+	
+	@Test
+	void testPlusHit() {
+		//given
+		int seq = 3;
+		
+		//when
+		boardService.plusHit(seq);
+		
+		//then
+		
+	}
+
+	
+	@Test
+	void testGetTotalCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardService.getTotalCount();
+		
+		//then
+		log.info("총 게시물 수 : " + totalCount);
+		
+	}
+	
+	@Test
+	void testGetTodayCount() {
+		//given
+		
+		
+		//when
+		int totalCount = boardService.getTodayCount();
+				
+		//then
+		log.info("오늘 게시물 수 : " + totalCount);		
+	}
+	
+	// 리스트 검색 서비스 테스트
+    @Test
+    public void testListSearchService() {
+        log.info("======= Service: listSearch 테스트 =======");
+        // 0번부터 10개, 제목(t) 검색, 키워드 '테스트'
+        List<BoardDTO> list = boardService.listSearch(0, 10, "w", "user01", "USER");
+        
+        list.forEach(dto -> log.info("조회된 글: " + dto.getTitle() + " | 조회수: " + dto.getHit()));
+    }
+
+    // 개수 검색 서비스 테스트
+    @Test
+    public void testListCountSearchService() {
+        log.info("======= Service: listCountSearch 테스트 =======");
+        int total = boardService.listCountSearch("w", "user01", "USER");
+        
+        log.info("검색된 총 개수: " + total);
+    }
+}

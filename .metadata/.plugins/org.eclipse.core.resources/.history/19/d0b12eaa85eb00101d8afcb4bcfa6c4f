@@ -1,0 +1,126 @@
+package controller;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import dto.BoardDTO;
+import dto.BoardListPaginDTO;
+import dto.MemberDTO;
+import dto.MemberListPaginDTO;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import service.BoardService;
+import service.MemberService;
+
+@Controller
+@Log4j2
+@RequestMapping("/admin")
+@RequiredArgsConstructor
+public class AdminController {
+
+	private final BoardService boardService;
+	private final MemberService memberService;
+	
+	
+	// 관리자 페이지
+	@GetMapping("/main")
+	public String mainPage(HttpSession session, Model model) {
+		
+		MemberDTO checkUser = (MemberDTO) session.getAttribute("member");
+		
+		if(checkUser == null || !checkUser.getRole().equalsIgnoreCase("ADMIN")) {
+			return "redirect:/";
+		}
+		
+		int totalCount = boardService.getTotalCount();
+		int todayCount = boardService.getTodayCount();
+		int totalMemberCount = memberService.getTotalMemberCount();
+		List<MemberDTO> recentMembers = memberService.getRecentMembers();
+		
+		model.addAttribute("boardTotalCount", totalCount);
+		model.addAttribute("boardTodayCount", todayCount);
+		model.addAttribute("totalMemberCount", totalMemberCount);
+		model.addAttribute("recentMembers", recentMembers);
+		
+		return "admin/main";
+	}
+	
+	// 게시물 관리 페이지
+	@GetMapping("board/list")
+	public String boardList(@RequestParam(value = "page", defaultValue = "1") int page,	// 기본 1page
+							@RequestParam(value = "size", defaultValue = "10") int size, 	// 기본 10개씩
+							@RequestParam(value = "types", required = false) String types,
+							@RequestParam(value = "keyword", required = false) String keyword,
+							Model model) {
+		
+		BoardListPaginDTO pageList = boardService.getListPaging(page, size, types, keyword);
+		
+		model.addAttribute("pageList", pageList);
+		
+		return "admin/board/boardList";
+	}
+	
+	@GetMapping("/board/api/list")
+	@ResponseBody // 페이지 이동이 아니라 '데이터'만 보냄
+	public BoardListPaginDTO getAdminListApi(
+	        @RequestParam(value = "page", defaultValue = "1") int page,
+	        @RequestParam(value = "size", defaultValue = "10") int size,
+	        @RequestParam(value = "types", required = false) String types,
+			@RequestParam(value = "keyword", required = false) String keyword) {
+	    
+	    // 기존에 게시판 리스트 가져오던 서비스 로직 그대로 사용
+	    return boardService.getListPaging(page, size, types, keyword);
+	}
+	
+	// 회원 관리 페이지
+	@GetMapping("member/list")
+	public String memberList(@RequestParam(value = "page", defaultValue = "1") int page,	// 기본 1page
+							@RequestParam(value = "size", defaultValue = "10") int size, 	// 기본 10개씩
+							@RequestParam(value = "types", required = false) String types,
+							@RequestParam(value = "keyword", required = false) String keyword,
+							Model model) {
+		
+		MemberListPaginDTO pageList = memberService.getListPaging(page, size, types, keyword);
+		
+		model.addAttribute("pageList", pageList);
+		
+		
+		return "admin/member/memberList";
+	}
+	
+	@GetMapping("/member/api/list")
+	@ResponseBody
+	public MemberListPaginDTO getMemberListApi(
+	        @RequestParam(value = "page", defaultValue = "1") int page,
+	        @RequestParam(value = "size", defaultValue = "10") int size,
+	        @RequestParam(value = "types", required = false) String types,   // 추가
+	        @RequestParam(value = "keyword", required = false) String keyword // 추가
+	) {
+	    // 서비스 호출 시 검색 조건도 함께 전달
+	    return memberService.getListPaging(page, size, types, keyword); 
+	}
+	
+	//관리자용 회원 상태 변경
+	@PostMapping("/updateEnabled")
+	@ResponseBody // 👈 페이지 이동이 아니라 '성공했다'는 신호만 보내기 위해 추가
+	public String updateEnabled(@RequestParam("id") String id,
+	                            @RequestParam("enabled") boolean enabled) {
+	    
+	    // DB 업데이트 실행
+	    memberService.updateEnabled(id, enabled);
+	    
+	    // 화면에 띄울 메시지를 데이터로 리턴 (또는 그냥 "success"라고만 해도 됨)
+	    String status = (enabled ? "활성화" : "비활성화(탈퇴)");
+	    return id + " 계정이 " + status + " 처리되었습니다.";
+	}
+	
+}
